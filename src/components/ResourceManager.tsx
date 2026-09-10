@@ -176,7 +176,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
           <Palette className="w-3.5 h-3.5 text-[#3574f0]" />
           <span className="font-semibold text-white">Resource Manager</span>
           <span className="text-[10px] bg-[#3574f0]/15 text-[#3574f0] font-mono px-1.5 py-0.5 rounded border border-[#3574f0]/30 font-semibold">
-            res/ ({resFiles.length} files)
+            res/ ({resFiles.length} berkas)
           </span>
         </div>
 
@@ -184,7 +184,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
           {copiedKey && (
             <span className="text-[10px] text-[#3ddc84] font-mono flex items-center gap-1">
               <Check className="w-3 h-3" />
-              <span>Copied: {copiedKey}</span>
+              <span>Disalin: {copiedKey}</span>
             </span>
           )}
           <button onClick={onClose} className="p-1 rounded hover:bg-[#2b2d30] text-gray-400 hover:text-white">
@@ -213,7 +213,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
             }`}
           >
             <Layers className="w-3 h-3" />
-            <span>Layouts ({layoutFiles.length})</span>
+            <span>Layout ({layoutFiles.length})</span>
           </button>
 
           <button
@@ -223,7 +223,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
             }`}
           >
             <Image className="w-3 h-3" />
-            <span>Drawables ({drawableFiles.length})</span>
+            <span>Drawable ({drawableFiles.length})</span>
           </button>
 
           <button
@@ -233,7 +233,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
             }`}
           >
             <Smartphone className="w-3 h-3" />
-            <span>Mipmaps ({mipmapFiles.length})</span>
+            <span>Mipmap ({mipmapFiles.length})</span>
           </button>
         </div>
 
@@ -242,7 +242,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
           <Search className="w-3.5 h-3.5 text-gray-400 mr-1.5 shrink-0" />
           <input
             type="text"
-            placeholder="Filter resources..."
+            placeholder="Filter resource..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-transparent text-white font-mono text-[11px] focus:outline-none"
@@ -323,7 +323,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
                 className="px-3 py-1.5 rounded bg-[#3574f0] hover:bg-[#2b64d6] text-white font-bold text-xs flex items-center space-x-1"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Add Color</span>
+                <span>Tambah Warna</span>
               </button>
             </div>
 
@@ -351,14 +351,14 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
                       <button
                         onClick={() => handleCopyRef(`@color/${col.name}`)}
                         className="p-1 hover:bg-[#1e1f22] text-gray-400 hover:text-white rounded"
-                        title="Copy @color reference"
+                        title="Salin referensi @color"
                       >
                         <Copy className="w-3 h-3" />
                       </button>
                       <button
                         onClick={() => handleDeleteColor(col.name)}
                         className="p-1 hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Delete color"
+                        title="Hapus warna"
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>
@@ -376,14 +376,14 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
             <div className="bg-[#2b2d30] p-3 rounded-xl border border-[#393b40] flex items-center space-x-2 flex-wrap gap-2">
               <input
                 type="text"
-                placeholder="string_key (e.g. app_title)"
+                placeholder="string_key (mis. app_title)"
                 value={newStringName}
                 onChange={(e) => setNewStringName(e.target.value)}
                 className="w-52 bg-[#1e1f22] border border-[#393b40] rounded px-2.5 py-1.5 text-white font-mono text-xs focus:outline-none"
               />
               <input
                 type="text"
-                placeholder="String value..."
+                placeholder="Nilai string..."
                 value={newStringVal}
                 onChange={(e) => setNewStringVal(e.target.value)}
                 className="flex-1 min-w-[200px] bg-[#1e1f22] border border-[#393b40] rounded px-2.5 py-1.5 text-white font-sans text-xs focus:outline-none"
@@ -393,7 +393,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
                 className="px-3 py-1.5 rounded bg-[#3574f0] hover:bg-[#2b64d6] text-white font-bold text-xs flex items-center space-x-1"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Add String</span>
+                <span>Tambah String</span>
               </button>
             </div>
 
@@ -415,14 +415,14 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
                       <button
                         onClick={() => handleCopyRef(`@string/${str.name}`)}
                         className="p-1 hover:bg-[#1e1f22] text-gray-400 hover:text-white rounded"
-                        title="Copy @string reference"
+                        title="Salin referensi @string"
                       >
                         <Copy className="w-3 h-3" />
                       </button>
                       <button
                         onClick={() => handleDeleteString(str.name)}
                         className="p-1 hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Delete string"
+                        title="Hapus string"
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>
@@ -440,14 +440,14 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
             <div className="bg-[#2b2d30] p-3 rounded-xl border border-[#393b40] flex items-center space-x-2 flex-wrap gap-2">
               <input
                 type="text"
-                placeholder="dimen_name (e.g. padding_medium)"
+                placeholder="dimen_name (mis. padding_medium)"
                 value={newDimenName}
                 onChange={(e) => setNewDimenName(e.target.value)}
                 className="w-52 bg-[#1e1f22] border border-[#393b40] rounded px-2.5 py-1.5 text-white font-mono text-xs focus:outline-none"
               />
               <input
                 type="text"
-                placeholder="Value (e.g. 16dp, 14sp)"
+                placeholder="Nilai (mis. 16dp, 14sp)"
                 value={newDimenVal}
                 onChange={(e) => setNewDimenVal(e.target.value)}
                 className="w-32 bg-[#1e1f22] border border-[#393b40] rounded px-2.5 py-1.5 text-white font-mono text-xs focus:outline-none"
@@ -457,14 +457,14 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
                 className="px-3 py-1.5 rounded bg-[#3574f0] hover:bg-[#2b64d6] text-white font-bold text-xs flex items-center space-x-1"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Add Dimen</span>
+                <span>Tambah Dimen</span>
               </button>
             </div>
 
             <div className="space-y-2 font-mono">
               {parsedDimens.length === 0 ? (
                 <div className="p-4 bg-[#2b2d30]/50 border border-dashed border-[#393b40] rounded-xl text-center text-gray-400">
-                  No dimens declared in dimens.xml.
+                  Tidak ada dimen dideklarasikan di dimens.xml.
                 </div>
               ) : (
                 parsedDimens
@@ -482,7 +482,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
                         <button
                           onClick={() => handleCopyRef(`@dimen/${d.name}`)}
                           className="p-1 hover:bg-[#1e1f22] text-gray-400 hover:text-white rounded"
-                          title="Copy reference"
+                          title="Salin referensi @dimen"
                         >
                           <Copy className="w-3 h-3" />
                         </button>
@@ -505,7 +505,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
           <div className="space-y-3">
             <div className="text-white font-bold flex items-center justify-between">
               <span>{themesFile.name} ({themesFile.path})</span>
-              <span className="text-[10px] text-gray-400 font-mono">Style & Theme Definition</span>
+              <span className="text-[10px] text-gray-400 font-mono">Definisi Tema & Gaya</span>
             </div>
             <textarea
               value={themesFile.content}
@@ -520,8 +520,8 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
         {selectedCategory === 'layouts' && (
           <div className="space-y-3">
             <div className="text-white font-bold mb-2 flex items-center justify-between">
-              <span>Project Layout XML Files ({layoutFiles.length})</span>
-              <span className="text-[10px] text-gray-400">Click to launch in Layout Visual Editor</span>
+              <span>Berkas XML Layout Proyek ({layoutFiles.length})</span>
+              <span className="text-[10px] text-gray-400">Klik untuk membuka di Editor Visual Layout</span>
             </div>
 
             <div className="space-y-2">
@@ -546,7 +546,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
                       <button
                         onClick={() => handleCopyRef(`@layout/${file.name.replace('.xml', '')}`)}
                         className="px-2 py-1 bg-[#1e1f22] text-gray-300 rounded font-mono text-[10px] flex items-center space-x-1 hover:text-white"
-                        title="Copy @layout reference"
+                        title="Salin referensi @layout"
                       >
                         <Copy className="w-2.5 h-2.5" />
                         <span>@layout/{file.name.replace('.xml', '')}</span>
@@ -557,7 +557,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
                           onClick={() => onOpenLayoutInEditor(file)}
                           className="px-3 py-1 bg-[#3574f0] hover:bg-[#2b64d6] text-white rounded font-bold text-xs flex items-center space-x-1"
                         >
-                          <span>Open in Layout Editor</span>
+                          <span>Buka di Layout Editor</span>
                           <ArrowRight className="w-3 h-3" />
                         </button>
                       )}
@@ -571,7 +571,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
         {/* DRAWABLES CATEGORY */}
         {selectedCategory === 'drawables' && (
           <div className="space-y-3">
-            <div className="text-white font-bold mb-2">Drawable Resources ({drawableFiles.length})</div>
+            <div className="text-white font-bold mb-2">Resource Drawable ({drawableFiles.length})</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {drawableFiles
                 .filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -595,7 +595,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
             {inspectingFile && (
               <div className="mt-4 p-3 bg-[#18191c] rounded-xl border border-[#2b2d30] space-y-2">
                 <div className="flex items-center justify-between text-xs font-bold text-white">
-                  <span>File Inspector: {inspectingFile.name}</span>
+                  <span>Inspektor Berkas: {inspectingFile.name}</span>
                   <button onClick={() => setInspectingFile(null)} className="text-gray-400 hover:text-white">
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -614,7 +614,7 @@ export const ResourceManager: React.FC<ResourceManagerProps> = ({
         {/* MIPMAPS CATEGORY */}
         {selectedCategory === 'mipmaps' && (
           <div className="space-y-3">
-            <div className="text-white font-bold mb-2">Mipmap Icons & Launchers ({mipmapFiles.length})</div>
+            <div className="text-white font-bold mb-2">Ikon & Peluncur Mipmap ({mipmapFiles.length})</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {mipmapFiles.map((file) => (
                 <div

@@ -17,9 +17,9 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({
   onRunBuild,
 }) => {
   const [lines, setLines] = useState<TerminalLine[]>([
-    { id: '1', type: 'info', text: 'Android Studio Mobile Shell Environment' },
-    { id: '2', type: 'info', text: `Project: ${projectName} (Native backend shell)` },
-    { id: '3', type: 'info', text: 'Type `help`, `ls`, `pwd`, `git status`, or `./gradlew tasks`' },
+    { id: '1', type: 'info', text: 'Lingkungan Shell Android Studio Mobile' },
+    { id: '2', type: 'info', text: `Proyek: ${projectName} (Shell backend native)` },
+    { id: '3', type: 'info', text: 'Ketik `help`, `ls`, `pwd`, `git status`, atau `./gradlew tasks`' },
   ]);
   const [inputCmd, setInputCmd] = useState('');
   const [history, setHistory] = useState<string[]>([]);
@@ -54,12 +54,12 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({
     if (command === 'help') {
       setLines(prev => [
         ...prev,
-        { id: Math.random().toString(), type: 'info', text: 'Available commands:' },
-        { id: Math.random().toString(), type: 'stdout', text: '  ./gradlew assembleDebug  - Compiles project into debug APK' },
-        { id: Math.random().toString(), type: 'stdout', text: '  ./gradlew clean          - Cleans project build directory' },
-        { id: Math.random().toString(), type: 'stdout', text: '  ./gradlew tasks          - Displays all available Gradle tasks' },
-        { id: Math.random().toString(), type: 'stdout', text: '  ls, pwd, cat, uname, git - Linux / project workspace commands' },
-        { id: Math.random().toString(), type: 'stdout', text: '  clear                    - Clears terminal output' },
+        { id: Math.random().toString(), type: 'info', text: 'Perintah yang tersedia:' },
+        { id: Math.random().toString(), type: 'stdout', text: '  ./gradlew assembleDebug  - Kompilasi proyek menjadi APK debug' },
+        { id: Math.random().toString(), type: 'stdout', text: '  ./gradlew clean          - Bersihkan direktori build proyek' },
+        { id: Math.random().toString(), type: 'stdout', text: '  ./gradlew tasks          - Tampilkan semua tugas Gradle yang tersedia' },
+        { id: Math.random().toString(), type: 'stdout', text: '  ls, pwd, cat, uname, git - Perintah Linux / ruang kerja proyek' },
+        { id: Math.random().toString(), type: 'stdout', text: '  clear                    - Bersihkan output terminal' },
       ]);
       return;
     }
@@ -81,12 +81,12 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({
         setLines(prev => [...prev, { id: Math.random().toString(), type: 'stderr', text: data.stderr.trim() }]);
       }
       if (data.exitCode !== undefined && data.exitCode !== 0) {
-        setLines(prev => [...prev, { id: Math.random().toString(), type: 'stderr', text: `Process exited with code ${data.exitCode}` }]);
+        setLines(prev => [...prev, { id: Math.random().toString(), type: 'stderr', text: `Proses keluar dengan kode ${data.exitCode}` }]);
       } else if (!data.stdout && !data.stderr) {
-        setLines(prev => [...prev, { id: Math.random().toString(), type: 'info', text: `Command completed (exit code 0)` }]);
+        setLines(prev => [...prev, { id: Math.random().toString(), type: 'info', text: `Perintah selesai (kode keluar 0)` }]);
       }
     } catch (err: any) {
-      setLines(prev => [...prev, { id: Math.random().toString(), type: 'stderr', text: `Execution failed: ${err.message}` }]);
+      setLines(prev => [...prev, { id: Math.random().toString(), type: 'stderr', text: `Eksekusi gagal: ${err.message}` }]);
     } finally {
       setIsLoading(false);
     }
@@ -123,7 +123,7 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({
       <div className="bg-[#18191c] border-b border-[#2b2d30] px-3 py-1.5 flex items-center justify-between select-none">
         <div className="flex items-center space-x-2">
           <TerminalIcon className="w-3.5 h-3.5 text-[#3ddc84]" />
-          <span className="font-semibold text-white">Local Terminal</span>
+          <span className="font-semibold text-white">Terminal Lokal</span>
           <span className="text-[10px] text-gray-400 font-normal">bash / zsh</span>
         </div>
 
@@ -143,7 +143,7 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({
           </button>
           <button
             onClick={() => setLines([])}
-            title="Clear output"
+            title="Bersihkan output"
             className="p-1 hover:bg-[#2b2d30] rounded text-gray-400 hover:text-white"
           >
             <Trash2 className="w-3 h-3" />
@@ -170,7 +170,7 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({
           </div>
         ))}
         {isLoading && (
-          <div className="text-gray-500 animate-pulse">Running command...</div>
+          <div className="text-gray-500 animate-pulse">Menjalankan perintah...</div>
         )}
       </div>
 
@@ -182,7 +182,7 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({
           value={inputCmd}
           onChange={(e) => setInputCmd(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Type command (e.g. ./gradlew assembleDebug)..."
+          placeholder="Ketik perintah (cth: ./gradlew assembleDebug)..."
           className="flex-1 bg-transparent text-white focus:outline-none text-[11px]"
         />
         <button

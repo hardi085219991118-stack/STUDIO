@@ -40,14 +40,14 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = ({
   const handleActionClick = () => {
     const next = clickCount + 1;
     setClickCount(next);
-    onSendLog('MainActivity', `Button clicked: tap count = ${next}`);
-    showToast(`Button Clicked! Count is ${next}`);
+    onSendLog('MainActivity', `Tombol diklik: hitungan = ${next}`);
+    showToast(`Tombol Diklik! Hitungan: ${next}`);
   };
 
   const handleResetClick = () => {
     setClickCount(0);
-    onSendLog('MainActivity', 'Counter reset to 0');
-    showToast('Counter Reset');
+    onSendLog('MainActivity', 'Penghitung direset ke 0');
+    showToast('Penghitung Direset');
   };
 
   const handleBack = () => {
@@ -72,9 +72,9 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = ({
         <div className="w-16 h-16 rounded-2xl bg-[#1e1f22] border border-[#393b40] flex items-center justify-center mb-4">
           <Smartphone className="w-8 h-8 text-amber-400 stroke-[1.5]" />
         </div>
-        <h3 className="text-white font-bold text-sm mb-1">NO DEVICE CONNECTED</h3>
+        <h3 className="text-white font-bold text-sm mb-1">TIDAK ADA PERANGKAT TERHUBUNG</h3>
         <p className="text-xs text-gray-400 max-w-sm mb-4">
-          Running and testing the application requires an active physical or virtual Android device connected via ADB.
+          Menjalankan dan menguji aplikasi memerlukan perangkat Android fisik atau virtual aktif yang terhubung via ADB.
         </p>
         {onOpenDeviceManager && (
           <button
@@ -82,7 +82,7 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = ({
             className="px-4 py-2 rounded-lg bg-[#3574f0] hover:bg-[#2662db] text-white font-semibold text-xs flex items-center space-x-2 transition-colors shadow-sm"
           >
             <Smartphone className="w-4 h-4" />
-            <span>Open Device Manager</span>
+            <span>Buka Pengelola Perangkat</span>
           </button>
         )}
       </div>
@@ -102,7 +102,7 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = ({
         <div className="flex items-center space-x-1">
           <button
             onClick={() => setIsLandscape(!isLandscape)}
-            title="Rotate Device"
+            title="Putar Perangkat"
             className="p-1 hover:bg-[#2b2d30] rounded text-gray-300 hover:text-white transition-colors"
           >
             <RotateCw className="w-3.5 h-3.5" />
@@ -111,14 +111,14 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = ({
             <>
               <button
                 onClick={onRestart}
-                title="Restart App"
+                title="Mulai Ulang Aplikasi"
                 className="p-1 hover:bg-[#2b2d30] rounded text-gray-300 hover:text-white transition-colors"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={onStop}
-                title="Stop App Execution"
+                title="Hentikan Eksekusi Aplikasi"
                 className="p-1 hover:bg-[#2b2d30] rounded text-red-400 transition-colors"
               >
                 <X className="w-3.5 h-3.5" />
@@ -131,9 +131,9 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = ({
       {/* Distinction Badge */}
       <div className="w-full max-w-sm mb-2 px-2 flex items-center justify-between text-[10px] text-gray-400">
         <span className="bg-[#3574f0]/10 text-[#3574f0] border border-[#3574f0]/30 px-1.5 py-0.5 rounded font-mono font-semibold">
-          SIMULATED PREVIEW (Interactive Sandbox)
+          PRATINJAU TERSIMULASI (Sandbox Interaktif)
         </span>
-        <span className="text-[9px] text-gray-500">Fast UI Event Bench</span>
+        <span className="text-[9px] text-gray-500">Uji Cepat Event UI</span>
       </div>
 
       {/* Phone Body Frame */}
@@ -159,16 +159,16 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = ({
             /* App Not Running Screen */
             <div className="flex-1 p-6 flex flex-col items-center justify-center text-center">
               <Power className="w-10 h-10 text-gray-600 mb-3 stroke-[1.5]" />
-              <div className="text-gray-300 font-bold text-xs mb-1">APP NOT RUNNING</div>
+              <div className="text-gray-300 font-bold text-xs mb-1">APLIKASI TIDAK BERJALAN</div>
               <p className="text-[11px] text-gray-500 max-w-[200px] mb-4">
-                Click "Run" in toolbar to build, install, and start the application on {device.name}.
+                Klik "Jalankan" di toolbar untuk mem-build, menginstal, dan memulai aplikasi pada {device.name}.
               </p>
               <button
                 onClick={onRestart}
                 className="px-3 py-1.5 rounded-lg bg-[#3ddc84] text-[#121316] font-bold text-xs flex items-center space-x-1.5 hover:bg-[#46e68d] transition-colors shadow-sm"
               >
                 <Play className="w-3.5 h-3.5 fill-current" />
-                <span>Launch App</span>
+                <span>Luncurkan Aplikasi</span>
               </button>
             </div>
           ) : currentScreen === 'app' ? (
@@ -192,7 +192,7 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = ({
 
               {/* Live Tap Counter */}
               <div className="text-2xl font-bold text-[#3ddc84] mb-4">
-                Taps: {clickCount}
+                Ketukan: {clickCount}
               </div>
 
               {/* Action Buttons */}
@@ -201,7 +201,7 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = ({
                 onClick={handleActionClick}
                 className="w-full py-2 px-3 rounded-xl bg-[#3ddc84] text-[#121316] font-bold text-xs mb-2 shadow hover:bg-[#46e68d] active:scale-95 transition-transform"
               >
-                Click Me
+                Ketuk Saya
               </button>
 
               <button
@@ -209,7 +209,7 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = ({
                 onClick={handleResetClick}
                 className="w-full py-1.5 px-3 rounded-xl bg-[#2b2d30] text-gray-300 text-xs hover:bg-[#35373c] active:scale-95 transition-transform"
               >
-                Reset Counter
+                Reset Penghitung
               </button>
             </div>
           ) : (
@@ -239,13 +239,13 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = ({
 
         {/* Navigation Bar (Back, Home, Recents) */}
         <div className="h-6 bg-black/90 flex items-center justify-around text-gray-400 text-xs shrink-0 z-20">
-          <button onClick={handleBack} className="p-1 hover:text-white" title="Back">
+          <button onClick={handleBack} className="p-1 hover:text-white" title="Kembali">
             <Triangle className="w-3 h-3 -rotate-90" />
           </button>
-          <button onClick={handleHome} className="p-1 hover:text-white" title="Home">
+          <button onClick={handleHome} className="p-1 hover:text-white" title="Beranda">
             <Circle className="w-3 h-3" />
           </button>
-          <button onClick={() => setCurrentScreen('app')} className="p-1 hover:text-white" title="Recents">
+          <button onClick={() => setCurrentScreen('app')} className="p-1 hover:text-white" title="Aplikasi Terkini">
             <Square className="w-3 h-3" />
           </button>
         </div>

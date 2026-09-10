@@ -39,7 +39,7 @@ export const SearchEverywhereModal: React.FC<SearchEverywhereModalProps> = ({
           <input
             type="text"
             autoFocus
-            placeholder="Search files, classes, symbols, or actions (Shift-Shift)..."
+            placeholder="Cari berkas, kelas, simbol, atau aksi (Shift-Shift)..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="flex-1 bg-transparent text-white focus:outline-none text-xs"
@@ -55,19 +55,19 @@ export const SearchEverywhereModal: React.FC<SearchEverywhereModalProps> = ({
             onClick={() => setActiveFilter('all')}
             className={`px-2 py-0.5 rounded ${activeFilter === 'all' ? 'bg-[#3574f0] text-white font-bold' : 'text-gray-400'}`}
           >
-            All
+            Semua
           </button>
           <button
             onClick={() => setActiveFilter('files')}
             className={`px-2 py-0.5 rounded ${activeFilter === 'files' ? 'bg-[#3574f0] text-white font-bold' : 'text-gray-400'}`}
           >
-            Files
+            Berkas
           </button>
           <button
             onClick={() => setActiveFilter('symbols')}
             className={`px-2 py-0.5 rounded ${activeFilter === 'symbols' ? 'bg-[#3574f0] text-white font-bold' : 'text-gray-400'}`}
           >
-            Symbols
+            Simbol
           </button>
         </div>
 
@@ -94,7 +94,7 @@ export const SearchEverywhereModal: React.FC<SearchEverywhereModalProps> = ({
           ))}
           {searchResults.length === 0 && (
             <div className="text-center py-6 text-gray-500 font-mono text-[11px]">
-              No matching files or symbols found.
+              Tidak ditemukan berkas atau simbol yang cocok.
             </div>
           )}
         </div>

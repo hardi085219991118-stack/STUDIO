@@ -28,7 +28,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="bg-[#18191c] border-b border-[#2b2d30] px-4 py-2.5 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Settings className="w-4 h-4 text-[#3574f0]" />
-            <h2 className="font-bold text-white text-sm">IDE Settings</h2>
+            <h2 className="font-bold text-white text-sm">Pengaturan IDE</h2>
           </div>
           <button onClick={onClose} className="p-1 rounded hover:bg-[#2b2d30] text-gray-400 hover:text-white">
             <X className="w-4 h-4" />
@@ -45,7 +45,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 activeCategory === 'editor' ? 'bg-[#3574f0] text-white font-bold' : 'text-gray-400 hover:text-white'
               }`}
             >
-              Code Editor
+              Editor Kode
             </button>
             <button
               onClick={() => setActiveCategory('appearance')}
@@ -53,7 +53,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 activeCategory === 'appearance' ? 'bg-[#3574f0] text-white font-bold' : 'text-gray-400 hover:text-white'
               }`}
             >
-              Appearance & Theme
+              Tampilan & Tema
             </button>
             <button
               onClick={() => setActiveCategory('build')}
@@ -61,7 +61,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 activeCategory === 'build' ? 'bg-[#3574f0] text-white font-bold' : 'text-gray-400 hover:text-white'
               }`}
             >
-              Build, Execution, SDK
+              Build, Eksekusi, SDK
             </button>
             <button
               onClick={() => setActiveCategory('touch')}
@@ -69,7 +69,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 activeCategory === 'touch' ? 'bg-[#3574f0] text-white font-bold' : 'text-gray-400 hover:text-white'
               }`}
             >
-              Touch Keyboard
+              Papan Ketik Sentuh
             </button>
           </div>
 
@@ -78,7 +78,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             {activeCategory === 'editor' && (
               <div className="space-y-3 font-mono">
                 <div>
-                  <label className="text-[11px] text-gray-400 block mb-1">Editor Font Size (px)</label>
+                  <label className="text-[11px] text-gray-400 block mb-1">Ukuran Font Editor (px)</label>
                   <input
                     type="number"
                     min={10}
@@ -90,14 +90,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-[11px] text-gray-400 block mb-1">Tab Size</label>
+                  <label className="text-[11px] text-gray-400 block mb-1">Ukuran Tab</label>
                   <select
                     value={current.tabSize}
                     onChange={(e) => setCurrent({ ...current, tabSize: Number(e.target.value) })}
                     className="w-full bg-[#121316] border border-[#393b40] rounded px-3 py-1.5 text-white"
                   >
-                    <option value={2}>2 spaces</option>
-                    <option value={4}>4 spaces (Standard Android)</option>
+                    <option value={2}>2 spasi</option>
+                    <option value={4}>4 spasi (Standar Android)</option>
                   </select>
                 </div>
 
@@ -109,7 +109,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       onChange={(e) => setCurrent({ ...current, lineNumbers: e.target.checked })}
                       className="rounded bg-[#121316] border-[#393b40] text-[#3574f0]"
                     />
-                    <span className="text-gray-200">Show Line Numbers</span>
+                    <span className="text-gray-200">Tampilkan Nomor Baris</span>
                   </label>
 
                   <label className="flex items-center space-x-2 cursor-pointer">
@@ -119,7 +119,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       onChange={(e) => setCurrent({ ...current, wordWrap: e.target.checked })}
                       className="rounded bg-[#121316] border-[#393b40] text-[#3574f0]"
                     />
-                    <span className="text-gray-200">Soft Wrap Long Lines</span>
+                    <span className="text-gray-200">Bungkus Baris Panjang (Soft Wrap)</span>
                   </label>
 
                   <label className="flex items-center space-x-2 cursor-pointer">
@@ -129,7 +129,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       onChange={(e) => setCurrent({ ...current, autoComplete: e.target.checked })}
                       className="rounded bg-[#121316] border-[#393b40] text-[#3574f0]"
                     />
-                    <span className="text-gray-200">Enable Code Completion Suggestions</span>
+                    <span className="text-gray-200">Aktifkan Saran Pelengkapan Kode</span>
                   </label>
                 </div>
               </div>
@@ -137,7 +137,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
             {activeCategory === 'appearance' && (
               <div className="space-y-3">
-                <label className="text-[11px] text-gray-400 block mb-1">IDE Color Scheme</label>
+                <label className="text-[11px] text-gray-400 block mb-1">Skema Warna IDE</label>
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { id: 'darcula', name: 'Darcula (Android Studio Dark)', bg: '#1e1f22' },
@@ -164,7 +164,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             {activeCategory === 'build' && (
               <div className="space-y-3 font-mono">
                 <div>
-                  <label className="text-[11px] text-gray-400 block mb-1">Android SDK Root Path</label>
+                  <label className="text-[11px] text-gray-400 block mb-1">Jalur Root Android SDK</label>
                   <input
                     type="text"
                     value={current.sdkPath}
@@ -174,7 +174,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-[11px] text-gray-400 block mb-1">Gradle JVM Options</label>
+                  <label className="text-[11px] text-gray-400 block mb-1">Opsi JVM Gradle</label>
                   <input
                     type="text"
                     value={current.jvmArgs}
@@ -194,10 +194,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     onChange={(e) => setCurrent({ ...current, touchKeyboardEnabled: e.target.checked })}
                     className="rounded bg-[#121316] border-[#393b40] text-[#3574f0]"
                   />
-                  <span className="text-gray-200">Show Mobile Programmer Touch Keyboard Bar</span>
+                  <span className="text-gray-200">Tampilkan Bilah Papan Ketik Sentuh Pemrogram Seluler</span>
                 </label>
                 <p className="text-[11px] text-gray-400">
-                  Adds handy syntax symbols {"{ } ( ) [ ] < > ; : = + - *"} and navigation cursor arrows above soft keyboard.
+                  Menambahkan simbol sintaksis cepat {"{ } ( ) [ ] < > ; : = + - *"} dan tombol panah kursor navigasi di atas keyboard lunak.
                 </p>
               </div>
             )}
@@ -210,13 +210,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             onClick={onClose}
             className="px-3 py-1.5 rounded bg-[#2b2d30] text-gray-300 hover:bg-[#35373c]"
           >
-            Cancel
+            Batal
           </button>
           <button
             onClick={handleSave}
             className="px-4 py-1.5 rounded bg-[#3574f0] hover:bg-[#2b64d6] text-white font-bold"
           >
-            Apply & Save
+            Terapkan & Simpan
           </button>
         </div>
       </div>

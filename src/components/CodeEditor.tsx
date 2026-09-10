@@ -457,7 +457,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     const lineNum = parseInt(targetLineInput, 10);
     const lines = activeTab.content.split('\n');
     if (isNaN(lineNum) || lineNum < 1 || lineNum > lines.length) {
-      setGotoLineError(`Please enter a valid line number between 1 and ${lines.length}`);
+      setGotoLineError(`Masukkan nomor baris yang valid antara 1 dan ${lines.length}`);
       return;
     }
 
@@ -487,9 +487,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     return (
       <div className="flex-1 flex flex-col items-center justify-center bg-[#1e1f22] text-[#868a98] select-none p-6 text-center">
         <FileCode className="w-12 h-12 text-[#35373c] mb-3" />
-        <p className="text-sm text-[#bcbec4] font-medium">No open files in editor</p>
+        <p className="text-sm text-[#bcbec4] font-medium">Tidak ada berkas terbuka di editor</p>
         <p className="text-xs text-[#6c707e] mt-1 max-w-sm">
-          Select a file from the Project Explorer or press Ctrl+O to open a source file.
+          Pilih berkas dari Penjelajah Proyek atau tekan Ctrl+O untuk membuka berkas sumber.
         </p>
       </div>
     );
@@ -519,7 +519,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                   {tab.isModified && ' *'}
                 </span>
                 {tab.isModified && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#f4a261] shrink-0" title="Unsaved changes" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#f4a261] shrink-0" title="Perubahan belum disimpan" />
                 )}
                 <button
                   onClick={(e) => {
@@ -527,7 +527,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                     requestCloseTab(tab);
                   }}
                   className="p-0.5 hover:bg-[#2b2d30] rounded text-gray-400 hover:text-white shrink-0 ml-1"
-                  title="Close tab"
+                  title="Tutup tab"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -541,17 +541,17 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           {activeTab.isModified && onSaveTab && (
             <button
               onClick={() => onSaveTab(activeTab.id)}
-              title="Save File (Ctrl+S)"
+              title="Simpan Berkas (Ctrl+S)"
               className="flex items-center gap-1 px-2 py-0.5 bg-[#2b2d30] hover:bg-[#3574f0] text-white rounded text-[10px] font-medium transition-colors"
             >
               <Save className="w-3 h-3" />
-              <span>Save</span>
+              <span>Simpan</span>
             </button>
           )}
 
           <button
             onClick={() => onPinTab(activeTab.id)}
-            title={activeTab.isPinned ? 'Unpin Tab' : 'Pin Tab'}
+            title={activeTab.isPinned ? 'Lepas Pin Tab' : 'Sematkan Tab (Pin)'}
             className={`p-1 rounded text-xs hover:bg-[#2b2d30] ${activeTab.isPinned ? 'text-[#3574f0]' : 'text-gray-400'}`}
           >
             <Pin className="w-3.5 h-3.5" />
@@ -559,7 +559,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
           <button
             onClick={() => onToggleSplit(splitMode === 'vertical' ? 'none' : 'vertical')}
-            title="Split Editor Vertically"
+            title="Bagi Editor Secara Vertikal"
             className={`p-1 rounded text-xs hover:bg-[#2b2d30] ${splitMode === 'vertical' ? 'text-[#3574f0]' : 'text-gray-400'}`}
           >
             <Split className="w-3.5 h-3.5" />
@@ -568,10 +568,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           {tabs.length > 1 && (
             <button
               onClick={() => onCloseOthers(activeTab.id)}
-              title="Close Other Tabs"
+              title="Tutup Tab Lainnya"
               className="px-1.5 py-0.5 text-[10px] text-gray-400 hover:text-white hover:bg-[#2b2d30] rounded"
             >
-              Close Others
+              Tutup Lainnya
             </button>
           )}
         </div>
@@ -585,7 +585,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             <input
               type="text"
               autoFocus
-              placeholder="Find..."
+              placeholder="Cari..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-transparent text-white focus:outline-none w-28 sm:w-44 text-xs font-mono"
@@ -602,7 +602,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               <Replace className="w-3 h-3 text-gray-400 shrink-0" />
               <input
                 type="text"
-                placeholder="Replace with..."
+                placeholder="Ganti dengan..."
                 value={replaceQuery}
                 onChange={(e) => setReplaceQuery(e.target.value)}
                 className="bg-transparent text-white focus:outline-none w-28 sm:w-44 text-xs font-mono"
@@ -615,7 +615,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             <button
               onClick={handlePrevMatch}
               disabled={matches.length === 0}
-              title="Previous Match (Shift+F3)"
+              title="Kecocokan Sebelumnya (Shift+F3)"
               className="p-1 hover:bg-[#393b40] rounded text-gray-300 disabled:opacity-40"
             >
               <ChevronUp className="w-3.5 h-3.5" />
@@ -623,7 +623,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             <button
               onClick={handleNextMatch}
               disabled={matches.length === 0}
-              title="Next Match (F3)"
+              title="Kecocokan Berikutnya (F3)"
               className="p-1 hover:bg-[#393b40] rounded text-gray-300 disabled:opacity-40"
             >
               <ChevronDown className="w-3.5 h-3.5" />
@@ -631,7 +631,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
             <button
               onClick={() => setMatchCase(!matchCase)}
-              title="Match Case"
+              title="Cocokkan Huruf Besar/Kecil"
               className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${
                 matchCase ? 'bg-[#3574f0] text-white border-[#3574f0]' : 'border-[#4e5157] text-gray-400'
               }`}
@@ -641,7 +641,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
             <button
               onClick={() => setWholeWord(!wholeWord)}
-              title="Match Whole Word"
+              title="Cocokkan Seluruh Kata"
               className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${
                 wholeWord ? 'bg-[#3574f0] text-white border-[#3574f0]' : 'border-[#4e5157] text-gray-400'
               }`}
@@ -656,14 +656,14 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                   disabled={matches.length === 0}
                   className="px-2 py-0.5 rounded bg-[#35373c] hover:bg-[#43454b] text-white text-[11px] disabled:opacity-40"
                 >
-                  Replace
+                  Ganti
                 </button>
                 <button
                   onClick={handleTriggerReplaceAll}
                   disabled={matches.length === 0}
                   className="px-2 py-0.5 rounded bg-[#3574f0] hover:bg-[#2b64d6] text-white text-[11px] disabled:opacity-40 font-medium"
                 >
-                  Replace All
+                  Ganti Semua
                 </button>
               </>
             )}
@@ -672,14 +672,14 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               onClick={() => setIsReplaceMode(!isReplaceMode)}
               className="px-2 py-0.5 text-[10px] text-gray-400 hover:text-white rounded hover:bg-[#35373c]"
             >
-              {isReplaceMode ? 'Hide Replace' : 'Replace'}
+              {isReplaceMode ? 'Sembunyikan Ganti' : 'Ganti'}
             </button>
           </div>
 
           <button
             onClick={() => setShowSearch(false)}
             className="p-1 hover:bg-[#393b40] rounded text-gray-400 hover:text-white ml-auto"
-            title="Close (Esc)"
+            title="Tutup (Esc)"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -729,7 +729,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         {splitMode !== 'none' && (
           <div className="flex-1 border-l border-[#2b2d30] bg-[#1e1f22] flex flex-col">
             <div className="bg-[#18191c] px-3 py-1.5 text-xs text-gray-400 border-b border-[#2b2d30] font-mono flex items-center justify-between">
-              <span>Split Secondary Pane: {activeTab.fileName}</span>
+              <span>Panel Sekunder Terpisah: {activeTab.fileName}</span>
               <button onClick={() => onToggleSplit('none')} className="text-gray-400 hover:text-white">
                 <X className="w-3 h-3" />
               </button>
@@ -748,19 +748,19 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             {activeTab.isModified ? (
               <span className="text-[#f4a261] flex items-center gap-1 font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#f4a261]" />
-                Modified (Unsaved)
+                Dimodifikasi (Belum disimpan)
               </span>
             ) : (
               <span className="text-[#3ddc84] flex items-center gap-1">
                 <Check className="w-3 h-3 text-[#3ddc84]" />
-                Saved
+                Tersimpan
               </span>
             )}
           </span>
           <span className="hidden sm:inline">UTF-8</span>
           <span className="capitalize">{activeTab.fileType}</span>
           {selectionLength > 0 && (
-            <span className="text-gray-400">({selectionLength} selected)</span>
+            <span className="text-gray-400">({selectionLength} dipilih)</span>
           )}
         </div>
 
@@ -772,11 +772,11 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               setGotoLineError('');
             }}
             className="hover:text-white transition-colors cursor-pointer"
-            title="Go to line (Ctrl+G)"
+            title="Lompat ke baris (Ctrl+G)"
           >
-            Ln {cursorPos.line}, Col {cursorPos.col}
+            Ln {cursorPos.line}, Kol {cursorPos.col}
           </button>
-          <span className="hidden sm:inline">4 spaces</span>
+          <span className="hidden sm:inline">4 spasi</span>
         </div>
       </footer>
 
@@ -784,7 +784,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       {gotoLineModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
           <div className="bg-[#2b2d30] border border-[#393b40] rounded-lg shadow-2xl p-4 w-80 text-white">
-            <h3 className="text-xs font-semibold mb-2">Go to Line</h3>
+            <h3 className="text-xs font-semibold mb-2">Lompat ke Baris</h3>
             <input
               type="number"
               autoFocus
@@ -808,13 +808,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 onClick={() => setGotoLineModal(false)}
                 className="px-2.5 py-1 text-xs rounded bg-[#35373c] text-gray-300 hover:text-white"
               >
-                Cancel
+                Batal
               </button>
               <button
                 onClick={handleGotoLine}
                 className="px-2.5 py-1 text-xs rounded bg-[#3574f0] text-white font-medium hover:bg-[#2b64d6]"
               >
-                Jump
+                Lompat
               </button>
             </div>
           </div>
@@ -827,17 +827,17 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           <div className="bg-[#2b2d30] border border-[#393b40] rounded-lg shadow-2xl p-4 w-96 text-white">
             <div className="flex items-center gap-2 mb-2 text-[#f4a261]">
               <AlertCircle className="w-4 h-4" />
-              <h3 className="text-xs font-semibold">UNSAVED CHANGES</h3>
+              <h3 className="text-xs font-semibold">PERUBAHAN BELUM DISIMPAN</h3>
             </div>
             <p className="text-xs text-gray-300 mb-4">
-              Save changes to <strong className="text-white">{unsavedDialogTab.fileName}</strong> before closing?
+              Simpan perubahan pada <strong className="text-white">{unsavedDialogTab.fileName}</strong> sebelum menutup?
             </p>
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setUnsavedDialogTab(null)}
                 className="px-2.5 py-1 text-xs rounded bg-[#35373c] text-gray-300 hover:text-white"
               >
-                Cancel
+                Batal
               </button>
               <button
                 onClick={() => {
@@ -847,7 +847,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 }}
                 className="px-2.5 py-1 text-xs rounded bg-[#494d54] text-white hover:bg-[#595d66]"
               >
-                Don't Save
+                Jangan Simpan
               </button>
               <button
                 onClick={() => {
@@ -858,7 +858,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 }}
                 className="px-2.5 py-1 text-xs rounded bg-[#3574f0] text-white font-medium hover:bg-[#2b64d6]"
               >
-                Save
+                Simpan
               </button>
             </div>
           </div>
@@ -869,22 +869,22 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       {replaceConfirmCount !== null && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
           <div className="bg-[#2b2d30] border border-[#393b40] rounded-lg shadow-2xl p-4 w-80 text-white">
-            <h3 className="text-xs font-semibold mb-2">Confirm Replace All</h3>
+            <h3 className="text-xs font-semibold mb-2">Konfirmasi Ganti Semua</h3>
             <p className="text-xs text-gray-300 mb-4">
-              Replace {replaceConfirmCount} occurrence{replaceConfirmCount > 1 ? 's' : ''} of &quot;{searchQuery}&quot; with &quot;{replaceQuery}&quot;?
+              Ganti {replaceConfirmCount} kemunculan &quot;{searchQuery}&quot; dengan &quot;{replaceQuery}&quot;?
             </p>
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setReplaceConfirmCount(null)}
                 className="px-2.5 py-1 text-xs rounded bg-[#35373c] text-gray-300 hover:text-white"
               >
-                Cancel
+                Batal
               </button>
               <button
                 onClick={executeReplaceAll}
                 className="px-2.5 py-1 text-xs rounded bg-[#3574f0] text-white font-medium hover:bg-[#2b64d6]"
               >
-                Replace All
+                Ganti Semua
               </button>
             </div>
           </div>

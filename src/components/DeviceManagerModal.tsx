@@ -42,9 +42,9 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
 
   useEffect(() => {
     if (!adbAvailable && limitationReason) {
-      setAdbOutput(`ADB Status: LIMITED BY ENVIRONMENT\nReason: ${limitationReason}\n\nNative USB host forwarding and ADB daemon are not bound to this container.`);
+      setAdbOutput(`Status ADB: DIBATASI OLEH LINGKUNGAN\nAlasan: ${limitationReason}\n\nForwarding host USB native dan daemon ADB tidak terikat ke kontainer ini.`);
     } else {
-      setAdbOutput('ADB daemon ready. Enter shell command to run on selected device.');
+      setAdbOutput('Daemon ADB siap. Masukkan perintah shell untuk dijalankan pada perangkat terpilih.');
     }
   }, [adbAvailable, limitationReason]);
 
@@ -54,12 +54,12 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
     try {
       const res = await AdbService.executeShell(selectedDevice?.id, adbCommand);
       if (res.success) {
-        setAdbOutput(res.stdout || '[Command completed with no output]');
+        setAdbOutput(res.stdout || '[Perintah selesai tanpa output]');
       } else {
-        setAdbOutput(`Exit Code: ${res.exitCode}\nStderr: ${res.stderr || 'Execution failed'}`);
+        setAdbOutput(`Kode Keluar: ${res.exitCode}\nStderr: ${res.stderr || 'Eksekusi gagal'}`);
       }
     } catch (err: any) {
-      setAdbOutput(`Error: ${err.message}`);
+      setAdbOutput(`Kesalahan: ${err.message}`);
     } finally {
       setIsExecutingAdb(false);
     }
@@ -67,24 +67,24 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
 
   const handlePair = async () => {
     setIsPairing(true);
-    setPairingStatus(`Attempting wireless pairing with ${wirelessIp}:${wirelessPort}...`);
+    setPairingStatus(`Mencoba pairing nirkabel dengan ${wirelessIp}:${wirelessPort}...`);
     try {
       if (pairingCode.trim()) {
         const pairRes = await AdbService.pairWireless(wirelessIp, wirelessPort, pairingCode);
         if (!pairRes.success) {
-          setPairingStatus(pairRes.error || pairRes.output || 'Wireless ADB pairing limited by environment.');
+          setPairingStatus(pairRes.error || pairRes.output || 'Pairing ADB nirkabel dibatasi oleh lingkungan.');
           return;
         }
       }
       const connectRes = await AdbService.connectWireless(wirelessIp, wirelessPort);
       if (connectRes.success) {
-        setPairingStatus(`Connected to ${wirelessIp}:${wirelessPort}!`);
+        setPairingStatus(`Terhubung ke ${wirelessIp}:${wirelessPort}!`);
         await onRefreshDevices();
       } else {
-        setPairingStatus(connectRes.error || connectRes.output || 'Connection failed.');
+        setPairingStatus(connectRes.error || connectRes.output || 'Koneksi gagal.');
       }
     } catch (err: any) {
-      setPairingStatus(`Error: ${err.message}`);
+      setPairingStatus(`Kesalahan: ${err.message}`);
     } finally {
       setIsPairing(false);
     }
@@ -97,13 +97,13 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
         <div className="bg-[#18191c] border-b border-[#2b2d30] px-4 py-2.5 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Smartphone className="w-4 h-4 text-[#3ddc84]" />
-            <h2 className="font-bold text-white text-sm">Device Manager & ADB</h2>
+            <h2 className="font-bold text-white text-sm">Pengelola Perangkat & ADB</h2>
             <span className={`text-[10px] px-2 py-0.5 rounded font-mono font-bold ${
               devices.length > 0 
                 ? 'bg-[#3ddc84]/20 text-[#3ddc84]' 
                 : 'bg-amber-500/20 text-amber-400'
             }`}>
-              {devices.length > 0 ? `${devices.length} ONLINE` : 'NO DEVICE'}
+              {devices.length > 0 ? `${devices.length} ONLINE` : 'TIDAK ADA PERANGKAT'}
             </span>
           </div>
           <button 
@@ -122,7 +122,7 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
               activeTab === 'devices' ? 'border-[#3574f0] text-white' : 'border-transparent text-gray-400 hover:text-gray-200'
             }`}
           >
-            Connected Devices ({devices.length})
+            Perangkat Terhubung ({devices.length})
           </button>
           <button
             onClick={() => setActiveTab('wireless')}
@@ -130,7 +130,7 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
               activeTab === 'wireless' ? 'border-[#3574f0] text-white' : 'border-transparent text-gray-400 hover:text-gray-200'
             }`}
           >
-            Pair Wireless ADB
+            Pasangkan ADB Nirkabel
           </button>
           <button
             onClick={() => setActiveTab('adb_console')}
@@ -146,7 +146,7 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
               activeTab === 'diagnostics' ? 'border-[#3574f0] text-white' : 'border-transparent text-gray-400 hover:text-gray-200'
             }`}
           >
-            Diagnostics & Capabilities
+            Diagnostik & Kemampuan
           </button>
         </div>
 
@@ -157,9 +157,9 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-white font-semibold text-xs">Target Android Devices</h3>
+                  <h3 className="text-white font-semibold text-xs">Perangkat Android Target</h3>
                   <p className="text-[11px] text-gray-400">
-                    Real physical and virtual devices discovered via ADB.
+                    Perangkat fisik dan virtual nyata yang ditemukan via ADB.
                   </p>
                 </div>
                 <button
@@ -168,29 +168,29 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
                   className="px-2.5 py-1.5 rounded bg-[#2b2d30] hover:bg-[#35373c] text-white flex items-center space-x-1.5 border border-[#393b40] transition-colors"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 text-[#3ddc84] ${isRefreshing ? 'animate-spin' : ''}`} />
-                  <span>Refresh Devices</span>
+                  <span>Segarkan Perangkat</span>
                 </button>
               </div>
 
               {devices.length === 0 ? (
                 <div className="border border-dashed border-[#393b40] rounded-xl p-8 text-center flex flex-col items-center justify-center bg-[#18191c]">
                   <Smartphone className="w-12 h-12 text-gray-600 mb-3 stroke-[1.5]" />
-                  <div className="text-white font-bold text-sm mb-1">NO DEVICE CONNECTED</div>
+                  <div className="text-white font-bold text-sm mb-1">TIDAK ADA PERANGKAT TERHUBUNG</div>
                   <p className="text-xs text-gray-400 max-w-md mb-4">
                     {!adbAvailable 
-                      ? 'ADB daemon binary is not installed in the container environment. Connecting physical USB devices or running ADB inside this web sandbox requires an external ADB server or bridge.'
-                      : 'No Android device attached. Enable "USB Debugging" in Developer Options on your phone, connect via USB, or pair using Wireless ADB.'}
+                      ? 'Biner daemon ADB tidak terinstal di lingkungan container. Menghubungkan perangkat fisik USB atau menjalankan ADB di dalam sandbox web ini memerlukan server atau jembatan ADB eksternal.'
+                      : 'Tidak ada perangkat Android yang terpasang. Aktifkan "USB Debugging" di Opsi Pengembang pada ponsel Anda, hubungkan via USB, atau pasangkan menggunakan ADB Nirkabel.'}
                   </p>
 
                   <div className="bg-[#1e1f22] border border-[#2b2d30] rounded-lg p-3 text-left w-full max-w-md text-[11px] text-gray-300 space-y-1.5 font-mono">
                     <div className="font-bold text-amber-400 flex items-center gap-1">
                       <AlertTriangle className="w-3.5 h-3.5" />
-                      <span>Troubleshooting Steps:</span>
+                      <span>Langkah Pemecahan Masalah:</span>
                     </div>
-                    <div>1. Enable Developer Options: Tap Build Number 7 times.</div>
-                    <div>2. Toggle USB Debugging: Settings → System → Developer options.</div>
-                    <div>3. Allow USB Debugging prompt when connecting to PC/Host.</div>
-                    <div>4. Or use Pair Wireless ADB tab with device IP & Port.</div>
+                    <div>1. Aktifkan Opsi Pengembang: Ketuk Nomor Build sebanyak 7 kali.</div>
+                    <div>2. Aktifkan USB Debugging: Pengaturan → Sistem → Opsi pengembang.</div>
+                    <div>3. Izinkan konfirmasi USB Debugging saat menghubungkan ke PC/Host.</div>
+                    <div>4. Atau gunakan tab Pasangkan ADB Nirkabel dengan IP & Port perangkat.</div>
                   </div>
                 </div>
               ) : (
@@ -234,7 +234,7 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
                           {isSelected ? (
                             <span className="flex items-center space-x-1 text-[#3ddc84] text-xs font-semibold">
                               <CheckCircle2 className="w-4 h-4" />
-                              <span>Selected Target</span>
+                              <span>Target Terpilih</span>
                             </span>
                           ) : (
                             <button
@@ -244,7 +244,7 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
                               }}
                               className="px-2.5 py-1 rounded bg-[#2b2d30] hover:bg-[#3574f0] text-gray-300 hover:text-white transition-colors"
                             >
-                              Select
+                              Pilih
                             </button>
                           )}
                         </div>
@@ -260,9 +260,9 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
           {activeTab === 'wireless' && (
             <div className="space-y-4">
               <div>
-                <h3 className="text-white font-semibold text-xs">Pair Device Over Wi-Fi</h3>
+                <h3 className="text-white font-semibold text-xs">Pasangkan Perangkat Melalui Wi-Fi</h3>
                 <p className="text-[11px] text-gray-400">
-                  Connect using Android 11+ Wireless Debugging (QR Code or 6-digit pairing code).
+                  Hubungkan menggunakan Debugging Nirkabel Android 11+ (Kode QR atau 6-digit kode pairing).
                 </p>
               </div>
 
@@ -270,9 +270,9 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
                 <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-amber-300 flex items-start space-x-2">
                   <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
                   <div>
-                    <div className="font-bold text-xs">WIRELESS ADB LIMITED BY ENVIRONMENT</div>
+                    <div className="font-bold text-xs">ADB NIRKABEL DIBATASI OLEH LINGKUNGAN</div>
                     <div className="text-[11px] opacity-90 mt-0.5">
-                      ADB client is not available in the container runtime. Commands cannot directly open TCP sockets to private LAN addresses without an external ADB daemon.
+                      Klien ADB tidak tersedia dalam runtime container. Perintah tidak dapat langsung membuka soket TCP ke alamat LAN privat tanpa daemon ADB eksternal.
                     </div>
                   </div>
                 </div>
@@ -281,12 +281,12 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
               <div className="bg-[#18191c] border border-[#2b2d30] rounded-lg p-4 space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] text-gray-400 font-mono mb-1">IP Address</label>
+                    <label className="block text-[11px] text-gray-400 font-mono mb-1">Alamat IP</label>
                     <input
                       type="text"
                       value={wirelessIp}
                       onChange={(e) => setWirelessIp(e.target.value)}
-                      placeholder="e.g. 192.168.1.100"
+                      placeholder="cth: 192.168.1.100"
                       className="w-full bg-[#1e1f22] border border-[#393b40] rounded px-2.5 py-1.5 text-white font-mono text-xs focus:outline-none focus:border-[#3574f0]"
                     />
                   </div>
@@ -296,19 +296,19 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
                       type="text"
                       value={wirelessPort}
                       onChange={(e) => setWirelessPort(e.target.value)}
-                      placeholder="e.g. 5555"
+                      placeholder="cth: 5555"
                       className="w-full bg-[#1e1f22] border border-[#393b40] rounded px-2.5 py-1.5 text-white font-mono text-xs focus:outline-none focus:border-[#3574f0]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] text-gray-400 font-mono mb-1">6-Digit Pairing Code (Optional)</label>
+                  <label className="block text-[11px] text-gray-400 font-mono mb-1">6-Digit Kode Pairing (Opsional)</label>
                   <input
                     type="text"
                     value={pairingCode}
                     onChange={(e) => setPairingCode(e.target.value)}
-                    placeholder="e.g. 123456"
+                    placeholder="cth: 123456"
                     className="w-full bg-[#1e1f22] border border-[#393b40] rounded px-2.5 py-1.5 text-white font-mono text-xs focus:outline-none focus:border-[#3574f0]"
                   />
                 </div>
@@ -323,7 +323,7 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
                     className="px-4 py-1.5 rounded bg-[#3574f0] hover:bg-[#2662db] text-white font-semibold flex items-center space-x-1.5 disabled:opacity-40 transition-colors shadow-sm"
                   >
                     <Wifi className="w-3.5 h-3.5" />
-                    <span>{isPairing ? 'Connecting...' : 'Pair & Connect'}</span>
+                    <span>{isPairing ? 'Menghubungkan...' : 'Pasangkan & Hubungkan'}</span>
                   </button>
                 </div>
 
@@ -341,9 +341,9 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
             <div className="space-y-3 flex flex-col h-full">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-white font-semibold text-xs">ADB Command Runner</h3>
+                  <h3 className="text-white font-semibold text-xs">Eksekutor Perintah ADB</h3>
                   <p className="text-[11px] text-gray-400">
-                    Target: {selectedDevice ? `${selectedDevice.name} (${selectedDevice.id})` : 'No device selected'}
+                    Target: {selectedDevice ? `${selectedDevice.name} (${selectedDevice.id})` : 'Belum ada perangkat yang dipilih'}
                   </p>
                 </div>
               </div>
@@ -354,7 +354,7 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
                   value={adbCommand}
                   onChange={(e) => setAdbCommand(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleExecuteAdb()}
-                  placeholder="adb shell command..."
+                  placeholder="perintah adb shell..."
                   className="flex-1 bg-[#18191c] border border-[#393b40] rounded px-3 py-1.5 text-white font-mono text-xs focus:outline-none focus:border-[#3574f0]"
                 />
                 <button
@@ -363,12 +363,12 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
                   className="px-3 py-1.5 rounded bg-[#2b2d30] hover:bg-[#3574f0] text-white font-semibold flex items-center space-x-1.5 disabled:opacity-40 transition-colors"
                 >
                   <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>Run</span>
+                  <span>Jalankan</span>
                 </button>
               </div>
 
               <div className="bg-[#141517] border border-[#2b2d30] rounded-lg p-3 font-mono text-[11px] text-gray-300 h-64 overflow-y-auto whitespace-pre-wrap">
-                {adbOutput || 'No output recorded yet.'}
+                {adbOutput || 'Belum ada output yang dicatat.'}
               </div>
             </div>
           )}
@@ -376,30 +376,30 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({
           {/* TAB 4: DIAGNOSTICS */}
           {activeTab === 'diagnostics' && (
             <div className="space-y-3">
-              <h3 className="text-white font-semibold text-xs">Container & Hardware Capabilities</h3>
+              <h3 className="text-white font-semibold text-xs">Kemampuan Container & Perangkat Keras</h3>
 
               <div className="bg-[#18191c] border border-[#2b2d30] rounded-lg divide-y divide-[#2b2d30] text-[11px] font-mono">
                 <div className="p-3 flex items-center justify-between">
-                  <span className="text-gray-400">ADB Tool Status</span>
+                  <span className="text-gray-400">Status Alat ADB</span>
                   <span className={`font-bold ${adbAvailable ? 'text-[#3ddc84]' : 'text-amber-400'}`}>
-                    {adbAvailable ? 'INSTALLED & READY' : 'NOT FOUND IN PATH'}
+                    {adbAvailable ? 'TERINSTAL & SIAP' : 'TIDAK DITEMUKAN DI PATH'}
                   </span>
                 </div>
                 <div className="p-3 flex items-center justify-between">
                   <span className="text-gray-400">USB Host Passthrough</span>
-                  <span className="text-gray-300">RESTRICTED (Container Sandboxed)</span>
+                  <span className="text-gray-300">TERBATAS (Container Sandboxed)</span>
                 </div>
                 <div className="p-3 flex items-center justify-between">
-                  <span className="text-gray-400">Execution Principle</span>
-                  <span className="text-[#3ddc84]">NON-ROOT FIRST</span>
+                  <span className="text-gray-400">Prinsip Eksekusi</span>
+                  <span className="text-[#3ddc84]">NON-ROOT TERLEBIH DAHULU</span>
                 </div>
                 <div className="p-3 flex items-center justify-between">
-                  <span className="text-gray-400">Target APK Install Strategy</span>
-                  <span className="text-gray-300">Direct ADB Streaming (-r -d)</span>
+                  <span className="text-gray-400">Strategi Instal APK Target</span>
+                  <span className="text-gray-300">Streaming ADB Langsung (-r -d)</span>
                 </div>
                 <div className="p-3 flex items-center justify-between">
-                  <span className="text-gray-400">Limitation Policy</span>
-                  <span className="text-amber-400">Strictly Non-Falsified (No Mock Devices)</span>
+                  <span className="text-gray-400">Kebijakan Batasan</span>
+                  <span className="text-amber-400">Ketat Tanpa Rekayasa (Tanpa Perangkat Palsu)</span>
                 </div>
               </div>
             </div>

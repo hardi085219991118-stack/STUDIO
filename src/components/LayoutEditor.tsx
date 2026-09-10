@@ -764,7 +764,7 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
           )}
 
           <span className="text-[10px] bg-[#3574f0]/15 text-[#3574f0] font-mono px-1.5 py-0.5 rounded border border-[#3574f0]/30 font-semibold">
-            XML SOURCE OF TRUTH
+            SUMBER KEBENARAN XML
           </span>
 
           {/* View Mode Toggle */}
@@ -773,19 +773,19 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
               onClick={() => setViewMode('design')}
               className={`px-2 py-0.5 rounded text-[11px] ${viewMode === 'design' ? 'bg-[#3574f0] text-white font-medium' : 'text-gray-400 hover:text-white'}`}
             >
-              Design
+              Desain
             </button>
             <button
               onClick={() => setViewMode('split')}
               className={`px-2 py-0.5 rounded text-[11px] ${viewMode === 'split' ? 'bg-[#3574f0] text-white font-medium' : 'text-gray-400 hover:text-white'}`}
             >
-              Split
+              Bagi
             </button>
             <button
               onClick={() => setViewMode('code')}
               className={`px-2 py-0.5 rounded text-[11px] ${viewMode === 'code' ? 'bg-[#3574f0] text-white font-medium' : 'text-gray-400 hover:text-white'}`}
             >
-              Code
+              Kode
             </button>
           </div>
         </div>
@@ -796,7 +796,7 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
             onClick={handleUndo}
             disabled={historyIndex <= 0}
             className="p-1 hover:bg-[#2b2d30] rounded text-gray-300 disabled:opacity-30"
-            title="Undo (Layout)"
+            title="Urungkan (Layout)"
           >
             <Undo className="w-3.5 h-3.5" />
           </button>
@@ -804,7 +804,7 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
             onClick={handleRedo}
             disabled={historyIndex >= history.length - 1}
             className="p-1 hover:bg-[#2b2d30] rounded text-gray-300 disabled:opacity-30"
-            title="Redo (Layout)"
+            title="Ulangi (Layout)"
           >
             <Redo className="w-3.5 h-3.5" />
           </button>
@@ -812,7 +812,7 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
           <button
             onClick={handleFormatXml}
             className="px-2 py-0.5 rounded bg-[#2b2d30] hover:bg-[#393b40] text-gray-300 text-[11px] font-mono border border-[#393b40]"
-            title="Reformat XML indentation"
+            title="Format indentasi XML"
           >
             Format XML
           </button>
@@ -821,10 +821,10 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
             <button
               onClick={onSaveLayout}
               className="px-2.5 py-0.5 rounded bg-[#3574f0] hover:bg-[#2b64d6] text-white text-[11px] font-bold flex items-center space-x-1"
-              title="Save layout to project disk"
+              title="Simpan layout ke disk proyek"
             >
               <Save className="w-3 h-3" />
-              <span>Save</span>
+              <span>Simpan</span>
             </button>
           )}
 
@@ -834,7 +834,7 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
           <button
             onClick={() => setDeviceOrientation(prev => prev === 'portrait' ? 'landscape' : 'portrait')}
             className={`p-1 rounded ${deviceOrientation === 'landscape' ? 'bg-[#3574f0] text-white' : 'hover:bg-[#2b2d30] text-gray-400'}`}
-            title={`Orientation: ${deviceOrientation}`}
+            title={`Orientasi: ${deviceOrientation === 'portrait' ? 'Potret' : 'Lansekap'}`}
           >
             <PhoneIcon className={`w-3.5 h-3.5 ${deviceOrientation === 'landscape' ? 'rotate-90' : ''}`} />
           </button>
@@ -853,7 +853,7 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
 
           <div className="h-3 w-[1px] bg-[#393b40]" />
 
-          <button onClick={onClose} className="p-1 hover:bg-red-500/20 hover:text-red-400 rounded text-gray-400" title="Close Layout Editor">
+          <button onClick={onClose} className="p-1 hover:bg-red-500/20 hover:text-red-400 rounded text-gray-400" title="Tutup Layout Editor">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -864,14 +864,14 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
         <div className="bg-red-500/10 border-b border-red-500/30 px-3 py-1.5 flex items-center justify-between text-xs text-red-300 font-mono shrink-0">
           <div className="flex items-center space-x-2 truncate">
             <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
-            <span className="truncate font-semibold">XML Validation Problem: {parseError.message}</span>
+            <span className="truncate font-semibold">Masalah Validasi XML: {parseError.message}</span>
             {parseError.line !== undefined && (
               <span className="bg-red-900/40 px-1.5 py-0.5 rounded text-[10px]">
-                Line {parseError.line}{parseError.column ? `:${parseError.column}` : ''}
+                Baris {parseError.line}{parseError.column ? `:${parseError.column}` : ''}
               </span>
             )}
           </div>
-          <span className="text-[10px] text-gray-400">Switch to Code mode to correct syntax</span>
+          <span className="text-[10px] text-gray-400">Beralih ke mode Kode untuk memperbaiki sintaksis</span>
         </div>
       )}
 
@@ -883,15 +883,15 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
             {/* Palette */}
             <div className="p-2 border-b border-[#2b2d30] max-h-48 overflow-y-auto">
               <div className="text-[10px] uppercase font-bold text-gray-400 mb-1.5 flex items-center justify-between sticky top-0 bg-[#18191c] py-0.5">
-                <span>Palette</span>
-                <span className="text-[9px] text-gray-500 font-mono">Click to Add</span>
+                <span>Palet</span>
+                <span className="text-[9px] text-gray-500 font-mono">Klik untuk Tambah</span>
               </div>
               <div className="grid grid-cols-2 gap-1 font-mono text-[10px]">
                 {paletteItems.map((item) => (
                   <div
                     key={item.tag}
                     className="p-1.5 bg-[#2b2d30] rounded border border-[#393b40] hover:border-[#3574f0] cursor-pointer flex items-center space-x-1.5 active:scale-95 transition-transform"
-                    title={`Add ${item.label} to layout`}
+                    title={`Tambah ${item.label} ke layout`}
                     onClick={() => handleAddPaletteItem(item.tag, item.defaultAttrs)}
                   >
                     <span className="w-3.5 h-3.5 bg-[#1e1f22] text-[#3ddc84] rounded flex items-center justify-center font-bold text-[10px]">
@@ -906,7 +906,7 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
             {/* Component Tree */}
             <div className="flex-1 p-2 overflow-y-auto">
               <div className="text-[10px] uppercase font-bold text-gray-400 mb-1.5 flex items-center justify-between">
-                <span>Component Tree</span>
+                <span>Pohon Komponen</span>
                 {selectedNode && (
                   <span className="text-[9px] text-[#3574f0] font-mono truncate max-w-[80px]">
                     {selectedNode.internalId}
@@ -917,7 +917,7 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
                 {parsedRoot ? (
                   renderTreeItem(parsedRoot)
                 ) : (
-                  <div className="text-gray-500 text-[11px] italic p-2">No valid XML tree parsed</div>
+                  <div className="text-gray-500 text-[11px] italic p-2">Tidak ada pohon XML valid yang diurai</div>
                 )}
               </div>
             </div>
@@ -930,8 +930,8 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
             {/* Explicit Label: DESIGN PREVIEW */}
             <div className="mb-2 text-[10px] font-mono text-gray-400 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#3ddc84]" />
-              <span className="font-semibold text-gray-300">DESIGN PREVIEW</span>
-              <span className="text-gray-500 text-[9px]">(HTML/CSS Visual Approximation — Canvas)</span>
+              <span className="font-semibold text-gray-300">PRATINJAU DESAIN</span>
+              <span className="text-gray-500 text-[9px]">(Aproksimasi Visual HTML/CSS — Kanvas)</span>
             </div>
 
             <div
@@ -960,7 +960,7 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
                 ) : (
                   <div className="flex-1 flex flex-col items-center justify-center text-center text-gray-500 text-xs p-4">
                     <AlertCircle className="w-8 h-8 mb-2 text-amber-400" />
-                    <span>Layout preview cannot be rendered due to XML syntax error.</span>
+                    <span>Pratinjau layout tidak dapat dirender karena kesalahan sintaksis XML.</span>
                   </div>
                 )}
               </div>
@@ -983,7 +983,7 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
                 <Code className="w-3.5 h-3.5 text-[#3574f0]" />
                 <span>{currentFile?.name || 'layout.xml'}</span>
               </span>
-              <span className="text-[10px] text-[#3ddc84] font-mono">Bi-directional Sync</span>
+              <span className="text-[10px] text-[#3ddc84] font-mono">Sinkronisasi Dua Arah</span>
             </div>
             <textarea
               value={xmlContent}
@@ -1002,7 +1002,7 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
             <div className="text-[11px] uppercase font-bold text-white mb-3 flex items-center justify-between pb-2 border-b border-[#2b2d30]">
               <span className="flex items-center gap-1.5">
                 <Sliders className="w-3.5 h-3.5 text-[#3574f0]" />
-                <span>Attributes</span>
+                <span>Atribut</span>
               </span>
               <span className="text-[10px] text-[#3ddc84] font-mono truncate max-w-[80px]">
                 {selectedNode.shortTag}
@@ -1133,20 +1133,20 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
 
               {/* Custom Attribute Adder */}
               <div className="pt-2 border-t border-[#2b2d30]">
-                <span className="text-[10px] text-gray-400 block mb-1 font-bold">Add Custom Attribute</span>
+                <span className="text-[10px] text-gray-400 block mb-1 font-bold">Tambah Atribut Kustom</span>
                 <div className="space-y-1">
                   <input
                     type="text"
                     value={customAttrKey}
                     onChange={(e) => setCustomAttrKey(e.target.value)}
-                    placeholder="e.g. android:padding"
+                    placeholder="mis. android:padding"
                     className="w-full bg-[#2b2d30] border border-[#393b40] rounded px-2 py-1 text-white text-[11px] focus:outline-none"
                   />
                   <input
                     type="text"
                     value={customAttrVal}
                     onChange={(e) => setCustomAttrVal(e.target.value)}
-                    placeholder="e.g. 16dp"
+                    placeholder="mis. 16dp"
                     className="w-full bg-[#2b2d30] border border-[#393b40] rounded px-2 py-1 text-white text-[11px] focus:outline-none"
                   />
                   <button
@@ -1159,7 +1159,7 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
                     }}
                     className="w-full py-1 bg-[#3574f0] hover:bg-[#2b64d6] text-white rounded font-bold text-[10px]"
                   >
-                    Add Attribute
+                    Tambah Atribut
                   </button>
                 </div>
               </div>
@@ -1171,7 +1171,7 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
                     className="w-full py-1.5 px-2 rounded bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold flex items-center justify-center space-x-1.5 transition-colors"
                   >
                     <Trash2 className="w-3 h-3" />
-                    <span>Delete View</span>
+                    <span>Hapus View</span>
                   </button>
                 </div>
               )}
@@ -1186,14 +1186,14 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
           <div className="bg-[#2b2d30] border border-[#393b40] rounded-xl p-4 w-full max-w-sm shadow-2xl">
             <h3 className="font-bold text-white text-sm mb-2 flex items-center gap-2">
               <FolderPlus className="w-4 h-4 text-[#3574f0]" />
-              <span>Create Layout Resource File</span>
+              <span>Buat Berkas Resource Layout</span>
             </h3>
             <p className="text-gray-400 text-xs mb-3">
-              Will be placed in <code className="text-[#3ddc84]">app/src/main/res/layout/</code>
+              Akan ditempatkan di <code className="text-[#3ddc84]">app/src/main/res/layout/</code>
             </p>
             <input
               type="text"
-              placeholder="e.g. activity_detail.xml"
+              placeholder="mis. activity_detail.xml"
               value={newLayoutFileName}
               onChange={(e) => setNewLayoutFileName(e.target.value)}
               className="w-full bg-[#1e1f22] border border-[#393b40] rounded px-3 py-1.5 text-white font-mono text-xs focus:outline-none mb-4"
@@ -1203,7 +1203,7 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
                 onClick={() => setShowNewLayoutDialog(false)}
                 className="px-3 py-1.5 rounded text-gray-400 hover:text-white text-xs"
               >
-                Cancel
+                Batal
               </button>
               <button
                 onClick={() => {
@@ -1217,7 +1217,7 @@ export const LayoutEditor: React.FC<LayoutEditorProps> = ({
                 }}
                 className="px-3 py-1.5 rounded bg-[#3574f0] hover:bg-[#2b64d6] text-white font-bold text-xs"
               >
-                Create
+                Buat
               </button>
             </div>
           </div>

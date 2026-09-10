@@ -63,7 +63,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const [deviceDropdownOpen, setDeviceDropdownOpen] = React.useState(false);
 
   const hasDevice = Boolean(selectedDevice && devices.some(d => d.id === selectedDevice.id));
-  const deviceDisplayName = hasDevice ? `${selectedDevice!.name}` : 'No Device';
+  const deviceDisplayName = hasDevice ? `${selectedDevice!.name}` : 'Tidak Ada Perangkat';
 
   return (
     <div className="bg-[#1e1f22] border-b border-[#2b2d30] px-2 py-1 flex items-center justify-between gap-1 select-none overflow-x-auto no-scrollbar">
@@ -72,7 +72,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <button
           id="btn-new-project"
           onClick={onNewProject}
-          title="New Project"
+          title="Proyek Baru"
           className="p-1.5 rounded hover:bg-[#2b2d30] text-[#bcbec4] hover:text-white transition-colors"
         >
           <FolderPlus className="w-4 h-4 text-[#3574f0]" />
@@ -80,7 +80,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <button
           id="btn-open-project"
           onClick={onOpenProject}
-          title="Open Project"
+          title="Buka Proyek"
           className="p-1.5 rounded hover:bg-[#2b2d30] text-[#bcbec4] hover:text-white transition-colors"
         >
           <FolderOpen className="w-4 h-4 text-[#f0a732]" />
@@ -88,7 +88,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <button
           id="btn-save-project"
           onClick={onSave}
-          title="Save All (Ctrl+S)"
+          title="Simpan Semua (Ctrl+S)"
           className="p-1.5 rounded hover:bg-[#2b2d30] text-[#bcbec4] hover:text-white transition-colors"
         >
           <Save className="w-4 h-4 text-[#3ddc84]" />
@@ -99,7 +99,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <button
           id="btn-undo"
           onClick={onUndo}
-          title="Undo"
+          title="Urungkan (Ctrl+Z)"
           className="p-1.5 rounded hover:bg-[#2b2d30] text-[#bcbec4] hover:text-white transition-colors"
         >
           <RotateCcw className="w-3.5 h-3.5" />
@@ -107,7 +107,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <button
           id="btn-redo"
           onClick={onRedo}
-          title="Redo"
+          title="Ulangi (Ctrl+Y)"
           className="p-1.5 rounded hover:bg-[#2b2d30] text-[#bcbec4] hover:text-white transition-colors"
         >
           <RotateCw className="w-3.5 h-3.5" />
@@ -115,7 +115,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <button
           id="btn-search-everywhere"
           onClick={onSearch}
-          title="Search Everywhere (Double Shift)"
+          title="Cari di Mana Saja (Shift dua kali)"
           className="p-1.5 rounded hover:bg-[#2b2d30] text-[#bcbec4] hover:text-white transition-colors"
         >
           <Search className="w-3.5 h-3.5" />
@@ -145,17 +145,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           {deviceDropdownOpen && (
             <div className="absolute right-0 sm:left-0 top-full mt-1 w-64 bg-[#2b2d30] border border-[#393b40] rounded-lg shadow-2xl py-1 text-xs z-50 divide-y divide-[#393b40]/50">
               <div className="px-3 py-1 text-[10px] text-[#868a98] uppercase tracking-wider font-semibold">
-                Target Device
+                Perangkat Target
               </div>
 
               {devices.length === 0 ? (
                 <div className="p-3 text-center text-gray-400">
                   <div className="text-amber-400 font-bold text-[11px] mb-0.5 flex items-center justify-center gap-1">
                     <AlertTriangle className="w-3 h-3" />
-                    <span>No Device Connected</span>
+                    <span>Tidak Ada Perangkat Terhubung</span>
                   </div>
                   <div className="text-[10px] text-gray-400 mb-2">
-                    Connect an Android device via USB or Wireless ADB
+                    Hubungkan perangkat Android via USB atau Wireless ADB
                   </div>
                   <button
                     onClick={() => {
@@ -164,7 +164,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                     }}
                     className="w-full py-1 bg-[#3574f0] text-white rounded text-[10px] font-semibold hover:bg-[#2662db]"
                   >
-                    Open Device Manager
+                    Buka Pengelola Perangkat
                   </button>
                 </div>
               ) : (
@@ -203,7 +203,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   }}
                   className="w-full text-left px-2.5 py-1.5 text-xs text-[#3574f0] hover:bg-[#3574f0] hover:text-white rounded transition-colors flex items-center gap-1.5 font-medium"
                 >
-                  <span>Device Manager & Pair Wireless ADB...</span>
+                  <span>Pengelola Perangkat & Pairing Nirkabel ADB...</span>
                 </button>
               </div>
             </div>
@@ -215,7 +215,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           id="btn-build-hammer"
           onClick={() => onBuild('assembleDebug')}
           disabled={isBuilding}
-          title="Make Project / Assemble APK (Ctrl+F9)"
+          title="Bangun Proyek / Assemble APK (Ctrl+F9)"
           className={`flex items-center space-x-1 px-2.5 py-1 rounded text-xs transition-colors ${
             isBuilding 
               ? 'bg-[#3ddc84]/20 text-[#3ddc84] cursor-wait' 
@@ -231,7 +231,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           id="btn-run-app"
           onClick={onRun}
           disabled={isRunning || isBuilding}
-          title="Run 'app' (Shift+F10)"
+          title="Jalankan 'app' (Shift+F10)"
           className={`flex items-center space-x-1 px-2.5 py-1 rounded text-xs font-semibold shadow-sm transition-all ${
             isRunning 
               ? 'bg-[#3ddc84]/20 text-[#3ddc84]' 
@@ -239,7 +239,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           }`}
         >
           <Play className="w-3.5 h-3.5 fill-current" />
-          <span className="text-[11px]">{runButtonState || 'Run'}</span>
+          <span className="text-[11px]">{runButtonState || 'Jalankan'}</span>
         </button>
 
         {/* Debug 🐞 */}
@@ -258,7 +258,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           id="btn-stop-app"
           onClick={onStop}
           disabled={!isRunning}
-          title={isRunning ? "Stop 'app' (Ctrl+F2)" : "No app currently running on device"}
+          title={isRunning ? "Hentikan 'app' (Ctrl+F2)" : "Tidak ada aplikasi yang sedang berjalan"}
           className="p-1.5 rounded hover:bg-[#2b2d30] text-[#f25c54] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           <Square className="w-3.5 h-3.5 fill-current" />
@@ -268,7 +268,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <button
           id="btn-gradle-sync"
           onClick={onSyncGradle}
-          title="Sync Project with Gradle Files"
+          title="Sinkronkan Proyek dengan Berkas Gradle"
           className="p-1.5 rounded hover:bg-[#2b2d30] text-[#3574f0] hover:text-blue-300 transition-colors"
         >
           <RefreshCw className="w-3.5 h-3.5" />
@@ -281,7 +281,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           <button
             id="btn-open-apk-manager"
             onClick={onOpenApkManager}
-            title="APK Manager"
+            title="Pengelola APK"
             className="p-1.5 rounded hover:bg-[#2b2d30] text-[#bcbec4] hover:text-[#3ddc84] transition-colors"
           >
             <Package className="w-3.5 h-3.5" />
@@ -291,7 +291,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           <button
             id="btn-open-git-panel"
             onClick={onOpenGit}
-            title="Git Version Control"
+            title="Kontrol Versi Git"
             className="p-1.5 rounded hover:bg-[#2b2d30] text-[#bcbec4] hover:text-[#3574f0] transition-colors"
           >
             <GitBranch className="w-3.5 h-3.5" />
@@ -300,7 +300,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <button
           id="btn-open-layout-editor"
           onClick={onOpenLayoutEditor}
-          title="Visual XML Layout Editor"
+          title="Editor Layout XML Visual"
           className="p-1.5 rounded hover:bg-[#2b2d30] text-[#bcbec4] hover:text-white transition-colors hidden sm:inline-flex"
         >
           <Layers className="w-3.5 h-3.5 text-[#3574f0]" />
@@ -324,7 +324,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <button
           id="btn-open-settings"
           onClick={onToggleSettings}
-          title="Settings (Ctrl+Alt+S)"
+          title="Pengaturan (Ctrl+Alt+S)"
           className="p-1.5 rounded hover:bg-[#2b2d30] text-[#bcbec4] hover:text-white transition-colors"
         >
           <Settings className="w-3.5 h-3.5" />

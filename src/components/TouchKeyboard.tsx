@@ -51,7 +51,7 @@ export const TouchKeyboard: React.FC<TouchKeyboardProps> = ({
     return (
       <button
         onClick={onToggleVisibility}
-        title="Show Mobile Programmer Keyboard"
+        title="Tampilkan Keyboard Pemrogram Seluler"
         className="fixed bottom-2 right-2 z-40 bg-[#3574f0] text-white p-2 rounded-full shadow-xl hover:bg-[#2b64d6] flex items-center gap-1 text-[11px] font-mono px-3"
       >
         <span>⌨</span>
@@ -71,7 +71,7 @@ export const TouchKeyboard: React.FC<TouchKeyboardProps> = ({
               quickSymbolsCategory === 'symbols' ? 'bg-[#2b2d30] text-[#3ddc84] font-bold' : 'text-gray-400 hover:text-gray-200'
             }`}
           >
-            Symbols
+            Simbol
           </button>
           <button
             onClick={() => setQuickSymbolsCategory('code')}
@@ -79,7 +79,7 @@ export const TouchKeyboard: React.FC<TouchKeyboardProps> = ({
               quickSymbolsCategory === 'code' ? 'bg-[#2b2d30] text-[#3ddc84] font-bold' : 'text-gray-400 hover:text-gray-200'
             }`}
           >
-            Code
+            Kode
           </button>
           <button
             onClick={() => setQuickSymbolsCategory('actions')}
@@ -87,14 +87,14 @@ export const TouchKeyboard: React.FC<TouchKeyboardProps> = ({
               quickSymbolsCategory === 'actions' ? 'bg-[#2b2d30] text-[#3ddc84] font-bold' : 'text-gray-400 hover:text-gray-200'
             }`}
           >
-            Shortcuts
+            Pintasan
           </button>
         </div>
 
         <button
           onClick={onToggleVisibility}
           className="text-gray-400 hover:text-white p-0.5"
-          title="Minimize Keyboard Bar"
+          title="Minimalkan Bilah Keyboard"
         >
           <ChevronDown className="w-3.5 h-3.5" />
         </button>
@@ -129,19 +129,19 @@ export const TouchKeyboard: React.FC<TouchKeyboardProps> = ({
         {quickSymbolsCategory === 'actions' && (
           <div className="flex items-center space-x-1">
             <button onClick={() => onActionKey('save')} className="h-7 px-2.5 rounded bg-[#2b2d30] hover:bg-[#3ddc84] hover:text-[#121316] text-white flex items-center gap-1 text-[11px]">
-              <Save className="w-3 h-3" /> Save (Ctrl+S)
+              <Save className="w-3 h-3" /> Simpan (Ctrl+S)
             </button>
             <button onClick={() => onActionKey('find')} className="h-7 px-2.5 rounded bg-[#2b2d30] hover:bg-[#3574f0] hover:text-white text-white flex items-center gap-1 text-[11px]">
-              <Search className="w-3 h-3" /> Find (Ctrl+F)
+              <Search className="w-3 h-3" /> Cari (Ctrl+F)
             </button>
             <button onClick={() => onActionKey('copy')} className="h-7 px-2.5 rounded bg-[#2b2d30] hover:bg-[#3574f0] hover:text-white text-white flex items-center gap-1 text-[11px]">
-              <Copy className="w-3 h-3" /> Copy (Ctrl+C)
+              <Copy className="w-3 h-3" /> Salin (Ctrl+C)
             </button>
             <button onClick={() => onActionKey('paste')} className="h-7 px-2.5 rounded bg-[#2b2d30] hover:bg-[#3574f0] hover:text-white text-white flex items-center gap-1 text-[11px]">
-              <Clipboard className="w-3 h-3" /> Paste (Ctrl+V)
+              <Clipboard className="w-3 h-3" /> Tempel (Ctrl+V)
             </button>
             <button onClick={() => onActionKey('select_all')} className="h-7 px-2.5 rounded bg-[#2b2d30] hover:bg-[#3574f0] hover:text-white text-white text-[11px]">
-              Select All (Ctrl+A)
+              Pilih Semua (Ctrl+A)
             </button>
           </div>
         )}

@@ -18,7 +18,7 @@ export const PROJECT_TEMPLATES = [
   {
     id: 'empty_views',
     name: 'Empty Views Activity',
-    description: 'Creates a new empty Activity with standard XML Layout and ViewBinding support.',
+    description: 'Membuat Activity kosong standar dengan dukungan Layout XML dan ViewBinding.',
     icon: 'Smartphone',
     defaultLanguage: 'Kotlin' as const,
     minSdk: 24,
@@ -28,7 +28,7 @@ export const PROJECT_TEMPLATES = [
   {
     id: 'compose_activity',
     name: 'Empty Activity (Compose)',
-    description: 'Modern Android UI with Jetpack Compose, Material 3, and Kotlin Coroutines.',
+    description: 'UI Android modern dengan Jetpack Compose, Material 3, dan Coroutine Kotlin.',
     icon: 'LayoutGrid',
     defaultLanguage: 'Kotlin' as const,
     minSdk: 26,
@@ -38,7 +38,7 @@ export const PROJECT_TEMPLATES = [
   {
     id: 'basic_activity',
     name: 'Basic Views Activity',
-    description: 'Activity with AppBar, Floating Action Button, and Navigation Component.',
+    description: 'Activity dengan AppBar, Floating Action Button, dan Komponen Navigasi.',
     icon: 'Layers',
     defaultLanguage: 'Kotlin' as const,
     minSdk: 24,
@@ -48,7 +48,7 @@ export const PROJECT_TEMPLATES = [
   {
     id: 'login_activity',
     name: 'Login Activity',
-    description: 'Complete user authentication flow with email/password validation and ViewModel.',
+    description: 'Alur autentikasi pengguna lengkap dengan validasi email/kata sandi dan ViewModel.',
     icon: 'Lock',
     defaultLanguage: 'Kotlin' as const,
     minSdk: 24,
@@ -58,7 +58,7 @@ export const PROJECT_TEMPLATES = [
   {
     id: 'nav_drawer',
     name: 'Navigation Drawer Activity',
-    description: 'Drawer layout with menu items, header view, and fragment navigation.',
+    description: 'Layout Drawer dengan item menu, tampilan header, dan navigasi fragment.',
     icon: 'Menu',
     defaultLanguage: 'Kotlin' as const,
     minSdk: 24,
@@ -68,7 +68,7 @@ export const PROJECT_TEMPLATES = [
   {
     id: 'java_project',
     name: 'Java Legacy Project',
-    description: 'Traditional Android Studio project built using Java 17 and AppCompat.',
+    description: 'Proyek Android Studio tradisional dibangun menggunakan Java 17 dan AppCompat.',
     icon: 'Coffee',
     defaultLanguage: 'Java' as const,
     minSdk: 21,

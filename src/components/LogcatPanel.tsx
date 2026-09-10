@@ -186,7 +186,7 @@ export const LogcatPanel: React.FC<LogcatPanelProps> = ({
               ? 'bg-[#2b2d30] text-[#3ddc84]' 
               : 'bg-amber-500/20 text-amber-400'
           }`}>
-            {selectedDevice ? `${selectedDevice.name} (${selectedDevice.id})` : 'NO DEVICE CONNECTED'}
+            {selectedDevice ? `${selectedDevice.name} (${selectedDevice.id})` : 'TIDAK ADA PERANGKAT TERHUBUNG'}
           </span>
 
           {selectedDevice && (
@@ -194,7 +194,7 @@ export const LogcatPanel: React.FC<LogcatPanelProps> = ({
               onClick={fetchRealLogcat}
               disabled={isStreaming}
               className="p-1 rounded hover:bg-[#2b2d30] text-gray-400 hover:text-white"
-              title="Poll latest device logcat stream via ADB"
+              title="Ambil stream logcat perangkat terbaru via ADB"
             >
               <RefreshCw className={`w-3 h-3 text-[#3574f0] ${isStreaming ? 'animate-spin' : ''}`} />
             </button>
@@ -209,12 +209,12 @@ export const LogcatPanel: React.FC<LogcatPanelProps> = ({
             onChange={(e) => setFilterLevel(e.target.value as LogLevel | 'ALL')}
             className="bg-[#2b2d30] border border-[#393b40] rounded px-2 py-0.5 text-[11px] text-white focus:outline-none"
           >
-            <option value="ALL">All Levels</option>
+            <option value="ALL">Semua Level</option>
             <option value="V">Verbose (V)</option>
             <option value="D">Debug (D)</option>
             <option value="I">Info (I)</option>
-            <option value="W">Warning (W)</option>
-            <option value="E">Error (E)</option>
+            <option value="W">Peringatan (W)</option>
+            <option value="E">Kesalahan (E)</option>
             <option value="F">Fatal (F)</option>
           </select>
 
@@ -223,7 +223,7 @@ export const LogcatPanel: React.FC<LogcatPanelProps> = ({
             <Search className="w-3 h-3 text-gray-400" />
             <input
               type="text"
-              placeholder="Filter logs..."
+              placeholder="Saring log..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-transparent text-white focus:outline-none text-[11px] w-24 sm:w-36"
@@ -233,7 +233,7 @@ export const LogcatPanel: React.FC<LogcatPanelProps> = ({
           {/* Pause / Resume */}
           <button
             onClick={() => setIsPaused(!isPaused)}
-            title={isPaused ? 'Resume log stream' : 'Pause log stream'}
+            title={isPaused ? 'Lanjutkan stream log' : 'Jeda stream log'}
             className={`p-1 rounded ${isPaused ? 'bg-[#ffc107] text-black font-bold' : 'hover:bg-[#2b2d30] text-gray-300'}`}
           >
             {isPaused ? <Play className="w-3 h-3 fill-current" /> : <Pause className="w-3 h-3" />}
@@ -243,7 +243,7 @@ export const LogcatPanel: React.FC<LogcatPanelProps> = ({
           <button
             onClick={handleDownloadLogs}
             disabled={filteredLogs.length === 0}
-            title="Export Logcat output"
+            title="Ekspor output Logcat"
             className="p-1 hover:bg-[#2b2d30] rounded text-gray-400 hover:text-white disabled:opacity-30"
           >
             <Download className="w-3 h-3" />
@@ -252,7 +252,7 @@ export const LogcatPanel: React.FC<LogcatPanelProps> = ({
           {/* Clear */}
           <button
             onClick={onClearLogs}
-            title="Clear Logcat"
+            title="Bersihkan Logcat"
             className="p-1 hover:bg-[#2b2d30] rounded text-gray-400 hover:text-white"
           >
             <Trash2 className="w-3 h-3" />
@@ -265,14 +265,14 @@ export const LogcatPanel: React.FC<LogcatPanelProps> = ({
         {!selectedDevice && logs.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center p-6 text-gray-500">
             <Smartphone className="w-8 h-8 text-gray-600 mb-2 stroke-[1.5]" />
-            <div className="text-gray-300 font-semibold mb-1">NO DEVICE CONNECTED</div>
+            <div className="text-gray-300 font-semibold mb-1">TIDAK ADA PERANGKAT TERHUBUNG</div>
             <p className="text-[11px] text-gray-500 max-w-sm">
-              Logcat requires an active physical Android device or emulated instance with USB/Wireless Debugging connected to the ADB daemon.
+              Logcat memerlukan perangkat fisik Android aktif atau emulator dengan Debugging USB/Nirkabel yang terhubung ke daemon ADB.
             </p>
           </div>
         ) : filteredLogs.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            No Logcat entries matching current filters.
+            Tidak ada entri Logcat yang cocok dengan filter saat ini.
           </div>
         ) : (
           filteredLogs.map(log => (

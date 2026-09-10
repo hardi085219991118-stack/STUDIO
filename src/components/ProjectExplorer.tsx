@@ -214,28 +214,28 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
       <div className="flex items-center justify-between px-2.5 py-2 border-b border-[#2b2d30] bg-[#18191c]">
         <div className="flex items-center space-x-1">
           <select
-            aria-label="Project View Mode"
+            aria-label="Mode Tampilan Proyek"
             value={viewMode}
             onChange={(e) => setViewMode(e.target.value as ProjectViewMode)}
             className="bg-[#2b2d30] text-white border border-[#393b40] rounded px-1.5 py-0.5 text-xs font-semibold focus:outline-none"
           >
             <option value="android">Android</option>
-            <option value="project">Project Files</option>
-            <option value="packages">Packages</option>
+            <option value="project">Berkas Proyek</option>
+            <option value="packages">Paket</option>
           </select>
         </div>
 
         <div className="flex items-center space-x-1">
           {clipboard && (
-            <span className="text-[10px] bg-[#3574f0]/20 text-[#3574f0] px-1 py-0.5 rounded font-mono" title={`Clipboard: ${clipboard.operation} ${clipboard.fileName}`}>
-              {clipboard.operation === 'cut' ? 'Cut' : 'Copied'}
+            <span className="text-[10px] bg-[#3574f0]/20 text-[#3574f0] px-1 py-0.5 rounded font-mono" title={`Papan Klip: ${clipboard.operation} ${clipboard.fileName}`}>
+              {clipboard.operation === 'cut' ? 'Potong' : 'Disalin'}
             </span>
           )}
 
           <button
             id="btn-explorer-refresh"
             onClick={onRefresh}
-            title="Refresh Filesystem"
+            title="Segarkan Sistem Berkas"
             className="p-1 hover:bg-[#2b2d30] rounded text-[#bcbec4] hover:text-white"
           >
             <RefreshCw className="w-3.5 h-3.5 text-[#868a98]" />
@@ -244,7 +244,7 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
           <button
             id="btn-explorer-new-file"
             onClick={() => handleOpenNewFileModal()}
-            title="New File (Kotlin / Java / XML)"
+            title="Berkas Baru (Kotlin / Java / XML)"
             className="p-1 hover:bg-[#2b2d30] rounded text-[#bcbec4] hover:text-white"
           >
             <FilePlus className="w-3.5 h-3.5 text-[#3ddc84]" />
@@ -253,7 +253,7 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
           <button
             id="btn-explorer-new-folder"
             onClick={() => handleOpenNewFolderModal()}
-            title="New Folder / Directory"
+            title="Folder / Direktori Baru"
             className="p-1 hover:bg-[#2b2d30] rounded text-[#bcbec4] hover:text-white"
           >
             <FolderPlus className="w-3.5 h-3.5 text-[#3574f0]" />
@@ -566,21 +566,21 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                   <button
                     onClick={(e) => { e.stopPropagation(); handleOpenRenameModal(file); }}
                     className="p-0.5 text-gray-400 hover:text-white"
-                    title="Rename"
+                    title="Ganti Nama"
                   >
                     <Edit2 className="w-3 h-3" />
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); setDeleteConfirmTarget(file); }}
                     className="p-0.5 text-gray-400 hover:text-red-400"
-                    title="Delete"
+                    title="Hapus"
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>
                   <button
                     onClick={(e) => openContextMenu(e, file)}
                     className="p-0.5 text-gray-400 hover:text-white"
-                    title="More Options"
+                    title="Opsi Lainnya"
                   >
                     <MoreVertical className="w-3 h-3" />
                   </button>
@@ -608,14 +608,14 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                 className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center gap-2"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
-                <span>Open in Editor</span>
+                <span>Buka di Editor</span>
               </button>
               <button
                 onClick={() => handleOpenRenameModal(contextMenu.file!)}
                 className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center gap-2"
               >
                 <Edit2 className="w-3.5 h-3.5" />
-                <span>Rename...</span>
+                <span>Ganti Nama...</span>
               </button>
               <button
                 onClick={() => {
@@ -625,7 +625,7 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                 className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center gap-2"
               >
                 <Copy className="w-3.5 h-3.5" />
-                <span>Copy File</span>
+                <span>Salin Berkas</span>
               </button>
               <button
                 onClick={() => {
@@ -635,7 +635,7 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                 className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center gap-2"
               >
                 <Scissors className="w-3.5 h-3.5" />
-                <span>Cut File</span>
+                <span>Potong Berkas</span>
               </button>
               <div className="border-t border-[#393b40] my-1" />
               <button
@@ -643,7 +643,7 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                 className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center gap-2"
               >
                 <Info className="w-3.5 h-3.5" />
-                <span>File Properties</span>
+                <span>Properti Berkas</span>
               </button>
               <button
                 onClick={() => {
@@ -654,7 +654,7 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                 className="w-full text-left px-3 py-1.5 hover:bg-[#e76f51] hover:text-white flex items-center gap-2 text-[#e76f51]"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                <span>Delete File</span>
+                <span>Hapus Berkas</span>
               </button>
             </>
           ) : (
@@ -665,14 +665,14 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                 className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center gap-2"
               >
                 <FilePlus className="w-3.5 h-3.5 text-[#3ddc84]" />
-                <span>New File...</span>
+                <span>Berkas Baru...</span>
               </button>
               <button
                 onClick={() => handleOpenNewFolderModal(contextMenu.folderPath || 'app/src/main')}
                 className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center gap-2"
               >
                 <FolderPlus className="w-3.5 h-3.5 text-[#3574f0]" />
-                <span>New Directory...</span>
+                <span>Direktori Baru...</span>
               </button>
               {clipboard && onPasteFile && (
                 <button
@@ -683,7 +683,7 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                   className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center gap-2"
                 >
                   <Clipboard className="w-3.5 h-3.5" />
-                  <span>Paste ({clipboard.fileName})</span>
+                  <span>Tempel ({clipboard.fileName})</span>
                 </button>
               )}
               <div className="border-t border-[#393b40] my-1" />
@@ -695,7 +695,7 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                 className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center gap-2"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
-                <span>Refresh Folder</span>
+                <span>Segarkan Folder</span>
               </button>
             </>
           )}
@@ -708,22 +708,22 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
           <div className="bg-[#2b2d30] border border-[#393b40] rounded-lg shadow-2xl w-full max-w-sm p-4 text-white">
             <h3 className="text-sm font-semibold text-[#e76f51] flex items-center gap-1.5 mb-2">
               <Trash2 className="w-4 h-4" />
-              <span>DELETE FILE?</span>
+              <span>HAPUS BERKAS?</span>
             </h3>
             <p className="text-xs text-gray-300 mb-1">
-              File: <strong className="text-white">{deleteConfirmTarget.name}</strong>
+              Berkas: <strong className="text-white">{deleteConfirmTarget.name}</strong>
             </p>
             <p className="text-xs text-gray-400 mb-4">
-              Path: <code className="text-gray-300">{deleteConfirmTarget.path}</code>
+              Jalur: <code className="text-gray-300">{deleteConfirmTarget.path}</code>
               <br />
-              This action cannot be undone.
+              Tindakan ini tidak dapat dibatalkan.
             </p>
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setDeleteConfirmTarget(null)}
                 className="px-3 py-1 text-xs rounded bg-[#35373c] hover:bg-[#43454b] text-gray-300"
               >
-                Cancel
+                Batal
               </button>
               <button
                 onClick={() => {
@@ -733,7 +733,7 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                 }}
                 className="px-3 py-1 text-xs rounded bg-[#e76f51] hover:bg-[#d65d3e] text-white font-medium"
               >
-                Delete
+                Hapus
               </button>
             </div>
           </div>
@@ -745,36 +745,36 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
           <div className="bg-[#2b2d30] border border-[#393b40] rounded-lg shadow-2xl w-full max-w-sm p-4 text-white">
             <h3 className="text-sm font-semibold mb-3">
-              {modalType === 'new_file' && 'Create New File'}
-              {modalType === 'new_folder' && 'Create New Directory'}
-              {modalType === 'rename' && 'Rename File'}
-              {modalType === 'properties' && 'File Properties'}
+              {modalType === 'new_file' && 'Buat Berkas Baru'}
+              {modalType === 'new_folder' && 'Buat Direktori Baru'}
+              {modalType === 'rename' && 'Ganti Nama Berkas'}
+              {modalType === 'properties' && 'Properti Berkas'}
             </h3>
 
             {modalType === 'properties' && targetFile ? (
               <div className="space-y-2 text-xs text-gray-300 font-mono">
                 <div>
-                  <span className="text-gray-400">File Name: </span>
+                  <span className="text-gray-400">Nama Berkas: </span>
                   <span className="text-white font-bold">{targetFile.name}</span>
                 </div>
                 <div>
-                  <span className="text-gray-400">Relative Path: </span>
+                  <span className="text-gray-400">Jalur Relatif: </span>
                   <span className="text-white break-all">{targetFile.path}</span>
                 </div>
                 <div>
-                  <span className="text-gray-400">File Type: </span>
+                  <span className="text-gray-400">Jenis Berkas: </span>
                   <span className="text-[#3ddc84] uppercase">{targetFile.type}</span>
                 </div>
                 <div>
-                  <span className="text-gray-400">Size: </span>
-                  <span>{targetFile.content?.length || 0} characters</span>
+                  <span className="text-gray-400">Ukuran: </span>
+                  <span>{targetFile.content?.length || 0} karakter</span>
                 </div>
                 <div className="flex justify-end pt-3">
                   <button
                     onClick={() => setModalType(null)}
                     className="px-3 py-1 text-xs rounded bg-[#3574f0] text-white font-medium"
                   >
-                    Close
+                    Tutup
                   </button>
                 </div>
               </div>
@@ -782,31 +782,31 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
               <div className="space-y-3">
                 {modalType === 'new_file' && (
                   <div>
-                    <label className="text-[11px] text-gray-400 block mb-1">File Type</label>
+                    <label className="text-[11px] text-gray-400 block mb-1">Jenis Berkas</label>
                     <select
                       value={selectedFileType}
                       onChange={(e) => setSelectedFileType(e.target.value as FileType)}
                       className="w-full bg-[#1e1f22] border border-[#393b40] rounded px-2 py-1.5 text-xs text-white"
                     >
-                      <option value="kotlin">Kotlin File (.kt)</option>
-                      <option value="java">Java Class (.java)</option>
-                      <option value="xml">Android XML Layout / Resource (.xml)</option>
-                      <option value="gradle">Gradle Script (.gradle.kts)</option>
-                      <option value="json">JSON Configuration (.json)</option>
-                      <option value="markdown">Markdown Documentation (.md)</option>
-                      <option value="text">Text File (.txt)</option>
+                      <option value="kotlin">Berkas Kotlin (.kt)</option>
+                      <option value="java">Class Java (.java)</option>
+                      <option value="xml">Layout / Resource XML Android (.xml)</option>
+                      <option value="gradle">Skrip Gradle (.gradle.kts)</option>
+                      <option value="json">Konfigurasi JSON (.json)</option>
+                      <option value="markdown">Dokumentasi Markdown (.md)</option>
+                      <option value="text">Berkas Teks (.txt)</option>
                     </select>
                   </div>
                 )}
 
                 <div>
                   <label className="text-[11px] text-gray-400 block mb-1">
-                    {modalType === 'rename' ? 'New Name' : 'Name'}
+                    {modalType === 'rename' ? 'Nama Baru' : 'Nama'}
                   </label>
                   <input
                     type="text"
                     autoFocus
-                    placeholder={modalType === 'new_file' ? 'e.g. DetailsActivity.kt' : 'e.g. viewmodel'}
+                    placeholder={modalType === 'new_file' ? 'cth. DetailsActivity.kt' : 'cth. viewmodel'}
                     value={inputName}
                     onChange={(e) => setInputName(e.target.value)}
                     onKeyDown={(e) => {
@@ -818,7 +818,7 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                 </div>
 
                 <div className="text-[10px] text-gray-400 font-mono">
-                  Location: <code>{targetFolderPath}</code>
+                  Lokasi: <code>{targetFolderPath}</code>
                 </div>
 
                 <div className="flex justify-end space-x-2 pt-2">
@@ -826,13 +826,13 @@ export const ProjectExplorer: React.FC<ProjectExplorerProps> = ({
                     onClick={() => setModalType(null)}
                     className="px-3 py-1 text-xs rounded bg-[#35373c] hover:bg-[#3e4147] text-gray-300"
                   >
-                    Cancel
+                    Batal
                   </button>
                   <button
                     onClick={handleConfirmAction}
                     className="px-3 py-1 text-xs rounded bg-[#3574f0] hover:bg-[#2b64d6] text-white font-medium"
                   >
-                    Confirm
+                    Konfirmasi
                   </button>
                 </div>
               </div>

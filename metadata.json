@@ -1,6 +1,6 @@
 {
   "name": "Android Studio Mobile",
-  "description": "Full-featured Android IDE for mobile devices with project explorer, code editor, touch keyboard, visual layout editor, Gradle build system, logcat, terminal, and device manager.",
+  "description": "IDE Android lengkap untuk perangkat seluler dengan penjelajah proyek, editor kode, keyboard sentuh, editor layout visual, sistem build Gradle, logcat, terminal, dan pengelola perangkat.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

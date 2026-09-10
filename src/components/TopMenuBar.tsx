@@ -94,7 +94,7 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             <span className="w-1.5 h-1.5 rounded-full bg-[#3ddc84] animate-pulse"></span>
             {projectName}
           </span>
-          {isSaving && <span className="text-[#3ddc84] text-[10px] animate-pulse">Saving...</span>}
+          {isSaving && <span className="text-[#3ddc84] text-[10px] animate-pulse">Menyimpan...</span>}
         </div>
       </div>
 
@@ -107,25 +107,25 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             onClick={() => handleMenuClick('File')}
             className={`px-2.5 py-1 rounded hover:bg-[#2b2d30] transition-colors whitespace-nowrap ${activeMenu === 'File' ? 'bg-[#2b2d30] text-white' : ''}`}
           >
-            File
+            Berkas
           </button>
           {activeMenu === 'File' && (
             <div className="absolute left-0 top-full mt-0.5 w-56 bg-[#2b2d30] border border-[#393b40] rounded shadow-xl py-1 text-xs z-50">
               <button onClick={() => executeAndClose(onNewProject)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center justify-between">
-                <span>New Project...</span>
+                <span>Proyek Baru...</span>
                 <span className="text-[10px] text-gray-400">Ctrl+N</span>
               </button>
               <button onClick={() => executeAndClose(onOpenProject)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center justify-between">
-                <span>Open Project...</span>
+                <span>Buka Proyek...</span>
                 <span className="text-[10px] text-gray-400">Ctrl+O</span>
               </button>
               <div className="h-[1px] bg-[#393b40] my-1" />
               <button onClick={() => executeAndClose(onSave)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center justify-between">
-                <span>Save All</span>
+                <span>Simpan Semua</span>
                 <span className="text-[10px] text-gray-400">Ctrl+S</span>
               </button>
               <button onClick={() => executeAndClose(onOpenSettings)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center justify-between">
-                <span>Settings...</span>
+                <span>Pengaturan...</span>
                 <span className="text-[10px] text-gray-400">Ctrl+Alt+S</span>
               </button>
             </div>
@@ -144,16 +144,16 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
           {activeMenu === 'Edit' && (
             <div className="absolute left-0 top-full mt-0.5 w-52 bg-[#2b2d30] border border-[#393b40] rounded shadow-xl py-1 text-xs z-50">
               <button onClick={() => executeAndClose(() => document.execCommand('undo'))} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex justify-between">
-                <span>Undo</span>
+                <span>Urungkan</span>
                 <span className="text-[10px] text-gray-400">Ctrl+Z</span>
               </button>
               <button onClick={() => executeAndClose(() => document.execCommand('redo'))} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex justify-between">
-                <span>Redo</span>
+                <span>Ulangi</span>
                 <span className="text-[10px] text-gray-400">Ctrl+Y</span>
               </button>
               <div className="h-[1px] bg-[#393b40] my-1" />
               <button onClick={() => executeAndClose(onSearchEverywhere)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex justify-between">
-                <span>Find in Files...</span>
+                <span>Cari di Berkas...</span>
                 <span className="text-[10px] text-gray-400">Ctrl+Shift+F</span>
               </button>
             </div>
@@ -167,18 +167,18 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             onClick={() => handleMenuClick('View')}
             className={`px-2.5 py-1 rounded hover:bg-[#2b2d30] transition-colors whitespace-nowrap ${activeMenu === 'View' ? 'bg-[#2b2d30] text-white' : ''}`}
           >
-            View
+            Tampilan
           </button>
           {activeMenu === 'View' && (
             <div className="absolute left-0 top-full mt-0.5 w-56 bg-[#2b2d30] border border-[#393b40] rounded shadow-xl py-1 text-xs z-50">
               <button onClick={() => executeAndClose(() => toggleSplit('none'))} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white">
-                Single Editor View
+                Tampilan Editor Tunggal
               </button>
               <button onClick={() => executeAndClose(() => toggleSplit('vertical'))} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white">
-                Split Vertically
+                Bagi Vertikal
               </button>
               <button onClick={() => executeAndClose(() => toggleSplit('horizontal'))} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white">
-                Split Horizontally
+                Bagi Horizontal
               </button>
             </div>
           )}
@@ -197,29 +197,29 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             <div className="absolute left-0 top-full mt-0.5 w-64 bg-[#2b2d30] border border-[#393b40] rounded shadow-xl py-1 text-xs z-50">
               {onSyncGradle && (
                 <button onClick={() => executeAndClose(onSyncGradle)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center justify-between text-[#3574f0]">
-                  <span>Sync Project with Gradle Files</span>
+                  <span>Sinkronkan Proyek dengan Berkas Gradle</span>
                   <RefreshCw className="w-3 h-3" />
                 </button>
               )}
               {onOpenDependencies && (
                 <button onClick={() => executeAndClose(onOpenDependencies)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white">
-                  Manage Dependencies...
+                  Kelola Dependensi...
                 </button>
               )}
               <div className="h-[1px] bg-[#393b40] my-1" />
               <button onClick={() => executeAndClose(() => onBuild('assembleDebug'))} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex justify-between">
                 <span>Assemble Debug APK</span>
-                <span className="text-[10px] text-[#3ddc84]">Recommended</span>
+                <span className="text-[10px] text-[#3ddc84]">Disarankan</span>
               </button>
               <button onClick={() => executeAndClose(() => onBuild('assembleRelease'))} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white">
                 Assemble Release APK
               </button>
               <div className="h-[1px] bg-[#393b40] my-1" />
               <button onClick={() => executeAndClose(() => onBuild('clean'))} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white">
-                Clean Project
+                Bersihkan Proyek
               </button>
               <button onClick={() => executeAndClose(() => onBuild('lint'))} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white">
-                Inspect Code / Lint
+                Periksa Kode / Lint
               </button>
             </div>
           )}
@@ -232,13 +232,13 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             onClick={() => handleMenuClick('Run')}
             className={`px-2.5 py-1 rounded hover:bg-[#2b2d30] transition-colors whitespace-nowrap ${activeMenu === 'Run' ? 'bg-[#2b2d30] text-white' : ''}`}
           >
-            Run
+            Jalankan
           </button>
           {activeMenu === 'Run' && (
             <div className="absolute left-0 top-full mt-0.5 w-52 bg-[#2b2d30] border border-[#393b40] rounded shadow-xl py-1 text-xs z-50">
               <button onClick={() => executeAndClose(onRun)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center gap-2">
                 <Play className="w-3 h-3 text-[#3ddc84]" />
-                <span>Run 'app'</span>
+                <span>Jalankan 'app'</span>
               </button>
               <button onClick={() => executeAndClose(onDebug)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center gap-2">
                 <Bug className="w-3 h-3 text-[#ffc107]" />
@@ -255,37 +255,37 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             onClick={() => handleMenuClick('Tools')}
             className={`px-2.5 py-1 rounded hover:bg-[#2b2d30] transition-colors whitespace-nowrap ${activeMenu === 'Tools' ? 'bg-[#2b2d30] text-white' : ''}`}
           >
-            Tools
+            Alat
           </button>
           {activeMenu === 'Tools' && (
             <div className="absolute left-0 top-full mt-0.5 w-60 bg-[#2b2d30] border border-[#393b40] rounded shadow-xl py-1 text-xs z-50">
               <button onClick={() => executeAndClose(onOpenLayoutEditor)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white">
-                Layout Visual Editor
+                Editor Layout Visual
               </button>
               <button onClick={() => executeAndClose(onOpenManifestEditor)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white">
-                AndroidManifest Editor
+                Editor AndroidManifest
               </button>
               <button onClick={() => executeAndClose(onOpenResourceManager)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white">
-                Resource Manager
+                Pengelola Resource
               </button>
               <div className="h-[1px] bg-[#393b40] my-1" />
               <button onClick={() => executeAndClose(onOpenDeviceManager)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white">
-                Device Manager / ADB
+                Pengelola Perangkat / ADB
               </button>
               {onOpenApkManager && (
                 <button onClick={() => executeAndClose(onOpenApkManager)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center justify-between">
-                  <span>APK Manager</span>
+                  <span>Pengelola APK</span>
                   <span className="text-[10px] text-[#3ddc84]">Builds</span>
                 </button>
               )}
               {onOpenGit && (
                 <button onClick={() => executeAndClose(onOpenGit)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center justify-between">
-                  <span>Git Version Control</span>
+                  <span>Kontrol Versi Git</span>
                   <span className="text-[10px] text-gray-400">VCS</span>
                 </button>
               )}
               <button onClick={() => executeAndClose(onOpenSdkManager)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white">
-                SDK Manager
+                Pengelola SDK
               </button>
               <button onClick={() => executeAndClose(onOpenTerminal)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white">
                 Terminal
@@ -304,16 +304,16 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
             onClick={() => handleMenuClick('Help')}
             className={`px-2.5 py-1 rounded hover:bg-[#2b2d30] transition-colors whitespace-nowrap ${activeMenu === 'Help' ? 'bg-[#2b2d30] text-white' : ''}`}
           >
-            Help
+            Bantuan
           </button>
           {activeMenu === 'Help' && (
             <div className="absolute left-0 top-full mt-0.5 w-64 bg-[#2b2d30] border border-[#393b40] rounded shadow-xl py-1 text-xs z-50">
               <div className="px-3 py-2 border-b border-[#393b40]">
                 <p className="font-semibold text-white">Android Studio Mobile</p>
-                <p className="text-[10px] text-gray-400">Native Android IDE runtime with Gradle & APK compiler</p>
+                <p className="text-[10px] text-gray-400">Runtime IDE Android mobile dengan compiler Gradle & APK</p>
               </div>
               <button onClick={() => executeAndClose(onSearchEverywhere)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white">
-                Search Everywhere (Double Shift)
+                Cari di Mana Saja (Shift dua kali)
               </button>
             </div>
           )}

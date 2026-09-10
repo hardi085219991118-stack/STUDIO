@@ -61,8 +61,8 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
     if (navigator.share && buildResult?.apkName) {
       try {
         await navigator.share({
-          title: 'Android Studio Mobile APK Output',
-          text: `Download compiled Android APK: ${buildResult.apkName}`,
+          title: 'Output APK Android Studio Mobile',
+          text: `Unduh APK Android yang dikompilasi: ${buildResult.apkName}`,
           url: window.location.href,
         });
       } catch (err) {
@@ -70,7 +70,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
       }
     } else {
       navigator.clipboard?.writeText(window.location.href);
-      alert('APK Link copied to clipboard!');
+      alert('Tautan APK disalin ke papan klip!');
     }
   };
 
@@ -87,7 +87,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
                 : 'text-gray-400 hover:text-white'
             }`}
           >
-            Build Console
+            Konsol Build
           </button>
           <button
             onClick={() => setActiveSubTab('environment')}
@@ -98,9 +98,9 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
             }`}
           >
             <Cpu className="w-3.5 h-3.5" />
-            <span>Build Environment</span>
+            <span>Lingkungan Build</span>
             {environmentStatus && !environmentStatus.isBuildReady && (
-              <span className="w-1.5 h-1.5 rounded-full bg-[#f4a261]" title="Incomplete Toolchain" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#f4a261]" title="Toolchain Belum Lengkap" />
             )}
           </button>
           <button
@@ -112,7 +112,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
-            <span>Gradle Tasks</span>
+            <span>Tugas Gradle</span>
           </button>
         </div>
 
@@ -124,7 +124,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
               className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#2b2d30] hover:bg-[#3574f0] text-gray-200 hover:text-white text-[11px]"
             >
               <RefreshCw className="w-3 h-3" />
-              <span>Probe Toolchain</span>
+              <span>Periksa Toolchain</span>
             </button>
           )}
 
@@ -137,12 +137,12 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
               {isBuilding ? (
                 <>
                   <RefreshCw className="w-3 h-3 animate-spin" />
-                  <span>Building...</span>
+                  <span>Membangun...</span>
                 </>
               ) : (
                 <>
                   <Play className="w-3 h-3 fill-white" />
-                  <span>Run Build</span>
+                  <span>Jalankan Build</span>
                 </>
               )}
             </button>
@@ -160,24 +160,24 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
               {isBuilding && (
                 <span className="flex items-center text-[#3574f0] font-medium gap-1">
                   <RefreshCw className="w-3 h-3 animate-spin" />
-                  Running Gradle check...
+                  Menjalankan pemeriksaan Gradle...
                 </span>
               )}
               {buildResult && !isBuilding && (
                 buildResult.success ? (
                   <span className="flex items-center text-[#3ddc84] font-bold gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    BUILD SUCCESSFUL ({(buildResult.durationMs / 1000).toFixed(1)}s)
+                    BUILD BERHASIL ({(buildResult.durationMs / 1000).toFixed(1)}d)
                   </span>
                 ) : buildResult.errorSummary?.message?.includes('ENVIRONMENT') || !environmentStatus?.isBuildReady ? (
                   <span className="flex items-center text-[#f4a261] font-bold gap-1 bg-[#f4a261]/10 px-1.5 py-0.5 rounded">
                     <ShieldAlert className="w-3.5 h-3.5 text-[#f4a261]" />
-                    BUILD LIMITED BY ENVIRONMENT
+                    BUILD DIBATASI OLEH LINGKUNGAN
                   </span>
                 ) : (
                   <span className="flex items-center text-[#f25c54] font-bold gap-1">
                     <XCircle className="w-3.5 h-3.5" />
-                    BUILD FAILED ({(buildResult.durationMs / 1000).toFixed(1)}s)
+                    BUILD GAGAL ({(buildResult.durationMs / 1000).toFixed(1)}d)
                   </span>
                 )
               )}
@@ -190,14 +190,14 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
               <div className="flex items-start space-x-2 text-[#f4a261]">
                 <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5 text-[#f4a261]" />
                 <div className="space-y-1">
-                  <div className="font-bold text-white text-xs">BUILD LIMITED BY ENVIRONMENT</div>
+                  <div className="font-bold text-white text-xs">BUILD DIBATASI OLEH LINGKUNGAN</div>
                   <div className="text-gray-300 text-[11px] leading-relaxed">
-                    Android/Gradle build toolchain (JDK 17+, Android SDK 34, AAPT2, D8) is not installed in the current container sandbox.
+                    Toolchain build Android/Gradle (JDK 17+, Android SDK 34, AAPT2, D8) belum terinstal dalam sandbox container saat ini.
                   </div>
                   <div className="text-[10px] text-gray-400 font-mono bg-black/40 p-2 rounded mt-1">
-                    <div>Status: BUILD TOOLCHAIN INCOMPLETE</div>
-                    <div>Required: JDK 17+ (Java), Gradle 8.0+, Android SDK 34 (platforms;android-34, build-tools;34.0.0)</div>
-                    <div className="text-gray-300 mt-1">Native execution command: <span className="text-[#3ddc84]">./gradlew assembleDebug</span></div>
+                    <div>Status: TOOLCHAIN BUILD BELUM LENGKAP</div>
+                    <div>Dibutuhkan: JDK 17+ (Java), Gradle 8.0+, Android SDK 34 (platforms;android-34, build-tools;34.0.0)</div>
+                    <div className="text-gray-300 mt-1">Perintah eksekusi native: <span className="text-[#3ddc84]">./gradlew assembleDebug</span></div>
                   </div>
                 </div>
               </div>
@@ -216,7 +216,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
                     <div>
                       <div className="font-bold text-white text-xs">{buildResult.apkName || 'app-debug.apk'}</div>
                       <div className="text-[10px] text-gray-400">
-                        Location: {buildResult.apkPath || 'app/build/outputs/apk/debug/app-debug.apk'}
+                        Lokasi: {buildResult.apkPath || 'app/build/outputs/apk/debug/app-debug.apk'}
                       </div>
                     </div>
                   </div>
@@ -228,15 +228,15 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
                       className="px-3 py-1.5 rounded-md bg-[#3ddc84] hover:bg-[#46e68d] text-[#121316] font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
                     >
                       <Download className="w-3.5 h-3.5" />
-                      <span>DOWNLOAD APK</span>
+                      <span>UNDUH APK</span>
                     </button>
                     <button
                       id="btn-share-apk"
                       onClick={handleShareApk}
-                      className="px-2.5 py-1.5 rounded-md bg-[#2b2d30] hover:bg-[#35373c] text-gray-200 text-xs flex items-center gap-1.5"
+                      className="px-2.5 py-1.5 rounded-md bg-[#2b2d30] hover:bg-[#3574f0] text-gray-200 text-xs flex items-center gap-1.5"
                     >
                       <Share2 className="w-3.5 h-3.5" />
-                      <span>SHARE</span>
+                      <span>BAGIKAN</span>
                     </button>
                   </div>
                 </div>
@@ -251,7 +251,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                 <div>
                   <div className="font-bold">
-                    Build Error in {buildResult.errorSummary.file} (Line {buildResult.errorSummary.line})
+                    Kesalahan Build di {buildResult.errorSummary.file} (Baris {buildResult.errorSummary.line})
                   </div>
                   <div className="text-gray-300 text-[11px] mt-0.5">{buildResult.errorSummary.message}</div>
                   {buildResult.errorSummary.stackTrace && (
@@ -268,7 +268,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
           <div ref={logContainerRef} className="flex-1 p-3 overflow-y-auto space-y-1 font-mono text-[11px] leading-relaxed">
             {liveLogs.length === 0 && !isBuilding && (
               <div className="text-gray-500 py-6 text-center">
-                Click &quot;Run Build&quot; or press Ctrl+F9 to trigger Gradle compilation.
+                Klik &quot;Jalankan Build&quot; atau tekan Ctrl+F9 untuk memulai kompilasi Gradle.
               </div>
             )}
             {liveLogs.map(log => (
@@ -298,21 +298,21 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
         <div className="flex-1 p-4 overflow-y-auto space-y-4 font-mono text-xs">
           <div className="flex items-center justify-between pb-2 border-b border-[#2b2d30]">
             <div>
-              <h3 className="font-bold text-white text-sm">BUILD ENVIRONMENT</h3>
+              <h3 className="font-bold text-white text-sm">LINGKUNGAN BUILD</h3>
               <p className="text-[11px] text-gray-400">
-                System toolchain probe and SDK capability verification
+                Pemeriksaan toolchain sistem dan verifikasi kapabilitas SDK
               </p>
             </div>
             <div>
               {environmentStatus?.isBuildReady ? (
                 <span className="px-2.5 py-1 rounded bg-[#3ddc84]/20 text-[#3ddc84] font-bold border border-[#3ddc84]/40 flex items-center gap-1.5">
                   <Check className="w-3.5 h-3.5" />
-                  READY FOR ANDROID BUILD
+                  SIAP UNTUK BUILD ANDROID
                 </span>
               ) : (
                 <span className="px-2.5 py-1 rounded bg-[#f4a261]/20 text-[#f4a261] font-bold border border-[#f4a261]/40 flex items-center gap-1.5">
                   <ShieldAlert className="w-3.5 h-3.5" />
-                  BUILD TOOLCHAIN INCOMPLETE
+                  TOOLCHAIN BUILD BELUM LENGKAP
                 </span>
               )}
             </div>
@@ -327,14 +327,14 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
                 <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
                   environmentStatus?.tools?.java?.available ? 'bg-[#3ddc84]/20 text-[#3ddc84]' : 'bg-[#f25c54]/20 text-[#f25c54]'
                 }`}>
-                  {environmentStatus?.tools?.java?.available ? 'AVAILABLE' : 'NOT AVAILABLE'}
+                  {environmentStatus?.tools?.java?.available ? 'TERSEDIA' : 'TIDAK TERSEDIA'}
                 </span>
               </div>
               <div className="text-gray-400 text-[11px]">
-                Version: <span className="text-gray-200">{environmentStatus?.tools?.java?.version || 'Not Detected'}</span>
+                Versi: <span className="text-gray-200">{environmentStatus?.tools?.java?.version || 'Tidak Terdeteksi'}</span>
               </div>
               <div className="text-gray-500 text-[10px]">
-                Target: JDK 17 (LTS) • Path: {environmentStatus?.tools?.java?.path || 'N/A'}
+                Target: JDK 17 (LTS) • Jalur: {environmentStatus?.tools?.java?.path || 'N/A'}
               </div>
             </div>
 
@@ -345,11 +345,11 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
                 <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
                   environmentStatus?.tools?.gradle?.available ? 'bg-[#3ddc84]/20 text-[#3ddc84]' : 'bg-[#f25c54]/20 text-[#f25c54]'
                 }`}>
-                  {environmentStatus?.tools?.gradle?.available ? 'AVAILABLE' : 'NOT AVAILABLE'}
+                  {environmentStatus?.tools?.gradle?.available ? 'TERSEDIA' : 'TIDAK TERSEDIA'}
                 </span>
               </div>
               <div className="text-gray-400 text-[11px]">
-                Version: <span className="text-gray-200">{environmentStatus?.tools?.gradle?.version || 'Not Detected'}</span>
+                Versi: <span className="text-gray-200">{environmentStatus?.tools?.gradle?.version || 'Tidak Terdeteksi'}</span>
               </div>
               <div className="text-gray-500 text-[10px]">
                 Target: Gradle 8.7 • Gradle Wrapper: gradlew
@@ -363,14 +363,14 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
                 <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
                   environmentStatus?.tools?.androidSdk?.available ? 'bg-[#3ddc84]/20 text-[#3ddc84]' : 'bg-[#f25c54]/20 text-[#f25c54]'
                 }`}>
-                  {environmentStatus?.tools?.androidSdk?.available ? 'AVAILABLE' : 'NOT AVAILABLE'}
+                  {environmentStatus?.tools?.androidSdk?.available ? 'TERSEDIA' : 'TIDAK TERSEDIA'}
                 </span>
               </div>
               <div className="text-gray-400 text-[11px]">
                 Compile SDK: <span className="text-gray-200">API 34 (Android 14)</span>
               </div>
               <div className="text-gray-500 text-[10px] truncate">
-                Path: {environmentStatus?.tools?.androidSdk?.path || 'ANDROID_HOME not set'}
+                Jalur: {environmentStatus?.tools?.androidSdk?.path || 'ANDROID_HOME belum disetel'}
               </div>
             </div>
 
@@ -381,14 +381,14 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
                 <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
                   environmentStatus?.tools?.aapt2?.available ? 'bg-[#3ddc84]/20 text-[#3ddc84]' : 'bg-[#f25c54]/20 text-[#f25c54]'
                 }`}>
-                  {environmentStatus?.tools?.aapt2?.available ? 'AVAILABLE' : 'NOT AVAILABLE'}
+                  {environmentStatus?.tools?.aapt2?.available ? 'TERSEDIA' : 'TIDAK TERSEDIA'}
                 </span>
               </div>
               <div className="text-gray-400 text-[11px]">
-                Version: <span className="text-gray-200">{environmentStatus?.tools?.aapt2?.version || 'Not Detected'}</span>
+                Versi: <span className="text-gray-200">{environmentStatus?.tools?.aapt2?.version || 'Tidak Terdeteksi'}</span>
               </div>
               <div className="text-gray-500 text-[10px]">
-                Component: Android Asset Packaging Tool v2
+                Komponen: Android Asset Packaging Tool v2
               </div>
             </div>
 
@@ -399,21 +399,21 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
                 <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
                   environmentStatus?.tools?.d8?.available ? 'bg-[#3ddc84]/20 text-[#3ddc84]' : 'bg-[#f25c54]/20 text-[#f25c54]'
                 }`}>
-                  {environmentStatus?.tools?.d8?.available ? 'AVAILABLE' : 'NOT AVAILABLE'}
+                  {environmentStatus?.tools?.d8?.available ? 'TERSEDIA' : 'TIDAK TERSEDIA'}
                 </span>
               </div>
               <div className="text-gray-400 text-[11px]">
-                Version: <span className="text-gray-200">{environmentStatus?.tools?.d8?.version || 'Not Detected'}</span>
+                Versi: <span className="text-gray-200">{environmentStatus?.tools?.d8?.version || 'Tidak Terdeteksi'}</span>
               </div>
               <div className="text-gray-500 text-[10px]">
-                Component: Dalvik Bytecode Converter (classes.dex)
+                Komponen: Dalvik Bytecode Converter (classes.dex)
               </div>
             </div>
 
             {/* Operating Environment */}
             <div className="bg-[#1e1f22] border border-[#2b2d30] rounded p-3 space-y-1">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-white">Operating Environment</span>
+                <span className="font-bold text-white">Lingkungan Operasi</span>
                 <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#3574f0]/20 text-[#3574f0]">
                   CONTAINER
                 </span>
@@ -429,9 +429,9 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
 
           {/* Explanation Box */}
           <div className="bg-[#1e1f22] border border-[#2b2d30] rounded p-3 space-y-2">
-            <h4 className="font-bold text-white text-xs">Architectural Notes on Mobile Android IDE</h4>
+            <h4 className="font-bold text-white text-xs">Catatan Arsitektur Android Studio Mobile</h4>
             <p className="text-gray-400 text-[11px] leading-relaxed">
-              When Android Studio Mobile runs inside this container sandbox, external compilation requires the standard Android toolchain. In a native Android deployment (e.g. on Android hardware via Termux or native embedded AAPT2/D8 binaries), Gradle commands invoke local binaries directly without simulation.
+              Ketika Android Studio Mobile berjalan di dalam sandbox container ini, kompilasi eksternal memerlukan toolchain Android standar. Pada perangkat fisik Android (misalnya melalui Termux atau biner tersemat AAPT2/D8 native), perintah Gradle memanggil biner lokal secara langsung.
             </p>
           </div>
         </div>
@@ -440,9 +440,9 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
       {/* Gradle Tasks Tab */}
       {activeSubTab === 'tasks' && (
         <div className="flex-1 p-4 overflow-y-auto space-y-3 font-mono text-xs">
-          <h3 className="font-bold text-white text-sm mb-2">GRADLE TASKS</h3>
+          <h3 className="font-bold text-white text-sm mb-2">TUGAS GRADLE</h3>
           <p className="text-[11px] text-gray-400 mb-3">
-            Select a Gradle task to execute against the active project
+            Pilih tugas Gradle untuk dijalankan pada proyek yang aktif
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -456,7 +456,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
                 <Play className="w-3 h-3 text-[#3574f0]" />
               </div>
               <div className="text-[11px] text-gray-400 mt-1">
-                Assembles debug APK package with debug certificate signing.
+                Kompilasi dan rakit paket APK debug dengan sertifikat penandatanganan debug.
               </div>
             </button>
 
@@ -470,7 +470,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
                 <Play className="w-3 h-3 text-[#3574f0]" />
               </div>
               <div className="text-[11px] text-gray-400 mt-1">
-                Assembles release APK (requires signing key configuration).
+                Kompilasi dan rakit APK release (memerlukan konfigurasi signing key).
               </div>
             </button>
 
@@ -484,7 +484,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
                 <Play className="w-3 h-3 text-[#3574f0]" />
               </div>
               <div className="text-[11px] text-gray-400 mt-1">
-                Deletes previous build outputs in build/ and clean intermediate caches.
+                Hapus output build sebelumnya di folder build/ dan bersihkan cache sementara.
               </div>
             </button>
 
@@ -498,7 +498,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
                 <Play className="w-3 h-3 text-[#3574f0]" />
               </div>
               <div className="text-[11px] text-gray-400 mt-1">
-                Runs Android lint analysis across layouts, resources, and Kotlin/Java code.
+                Jalankan analisis lint Android di seluruh layout, resource, dan kode Kotlin/Java.
               </div>
             </button>
           </div>

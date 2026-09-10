@@ -105,7 +105,7 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
         <div className="bg-[#18191c] border-b border-[#2b2d30] px-4 py-3 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-2">
             <Package className="w-4 h-4 text-[#3574f0]" />
-            <h2 className="font-bold text-white text-sm">Dependencies & Version Catalog</h2>
+            <h2 className="font-bold text-white text-sm">Dependensi & Version Catalog</h2>
             <span className="text-[10px] bg-[#3574f0]/15 text-[#3574f0] px-1.5 py-0.5 rounded font-mono border border-[#3574f0]/30 font-semibold">
               Gradle
             </span>
@@ -119,10 +119,10 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
                   onClose();
                 }}
                 className="px-2 py-1 bg-[#3ddc84]/15 hover:bg-[#3ddc84]/25 border border-[#3ddc84]/30 text-[#3ddc84] rounded font-mono text-[10px] font-semibold flex items-center space-x-1"
-                title="Sync project with Gradle files"
+                title="Sinkronkan proyek dengan berkas Gradle"
               >
                 <RefreshCw className="w-3 h-3" />
-                <span>Sync Now</span>
+                <span>Sinkron Sekarang</span>
               </button>
             )}
             <button onClick={onClose} className="p-1 rounded hover:bg-[#2b2d30] text-gray-400 hover:text-white">
@@ -140,7 +140,7 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
                 activeTab === 'catalog' ? 'bg-[#3574f0] text-white' : 'text-gray-400 hover:text-white'
               }`}
             >
-              Add Dependencies
+              Tambah Dependensi
             </button>
             <button
               onClick={() => setActiveTab('active')}
@@ -148,7 +148,7 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
                 activeTab === 'active' ? 'bg-[#3574f0] text-white' : 'text-gray-400 hover:text-white'
               }`}
             >
-              <span>Active in Project</span>
+              <span>Aktif di Proyek</span>
               <span className="bg-black/30 px-1.5 py-0.2 rounded font-mono text-[10px]">
                 {activeDependencies.length}
               </span>
@@ -172,7 +172,7 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
               <Search className="w-3.5 h-3.5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search Maven dependencies (Retrofit, Room, Coroutines)..."
+                placeholder="Cari dependensi Maven (Retrofit, Room, Coroutines)..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="flex-1 bg-transparent text-white focus:outline-none text-xs"
@@ -187,7 +187,7 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
             <>
               {/* Custom coordinate manual adder */}
               <div className="p-3 bg-[#2b2d30] rounded-xl border border-[#393b40] space-y-2 mb-3">
-                <span className="font-bold text-white text-[11px] block">Add Custom Maven Coordinate</span>
+                <span className="font-bold text-white text-[11px] block">Tambah Koordinat Maven Kustom</span>
                 <div className="flex items-center space-x-2">
                   <select
                     value={customConfig}
@@ -211,7 +211,7 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
                     onClick={handleAddCustom}
                     className="px-3 py-1.5 rounded bg-[#3574f0] hover:bg-[#2b64d6] text-white font-bold text-xs"
                   >
-                    Add
+                    Tambah
                   </button>
                 </div>
               </div>
@@ -239,7 +239,7 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
                       {isAlreadyAdded ? (
                         <span className="flex items-center text-[#3ddc84] text-[11px] font-bold gap-1 bg-[#3ddc84]/10 px-2.5 py-1 rounded border border-[#3ddc84]/30">
                           <Check className="w-3.5 h-3.5" />
-                          Added
+                          Ditambahkan
                         </span>
                       ) : (
                         <button
@@ -247,7 +247,7 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
                           className="px-3 py-1.5 rounded bg-[#3574f0] hover:bg-[#2b64d6] text-white font-bold text-[11px] flex items-center gap-1 active:scale-95 transition-transform"
                         >
                           <Plus className="w-3 h-3" />
-                          <span>Add</span>
+                          <span>Tambah</span>
                         </button>
                       )}
                     </div>
@@ -259,12 +259,12 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
             /* Active dependencies view */
             <div className="space-y-2">
               <div className="text-gray-400 text-xs mb-2">
-                Parsed from <span className="font-mono text-white">app/build.gradle.kts</span>:
+                Dianalisis dari <span className="font-mono text-white">app/build.gradle.kts</span>:
               </div>
 
               {activeDependencies.length === 0 ? (
                 <div className="p-4 bg-[#2b2d30] rounded-xl text-center text-gray-400">
-                  No dependencies parsed from current build script.
+                  Tidak ada dependensi yang ditemukan dari skrip build saat ini.
                 </div>
               ) : (
                 activeDependencies.map((dep, idx) => (
@@ -283,7 +283,7 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
                       <button
                         onClick={() => onRemoveDependency(dep.rawLine)}
                         className="p-1 hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded transition-colors"
-                        title="Remove dependency"
+                        title="Hapus dependensi"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -300,7 +300,7 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
                 {savedTomlSuccess && (
                   <span className="text-[#3ddc84] text-xs flex items-center gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Saved!</span>
+                    <span>Tersimpan!</span>
                   </span>
                 )}
               </div>
@@ -315,7 +315,7 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
                   onClick={handleSaveToml}
                   className="px-4 py-1.5 bg-[#3574f0] hover:bg-[#2b64d6] text-white rounded font-bold text-xs"
                 >
-                  Save Version Catalog
+                  Simpan Version Catalog
                 </button>
               </div>
             </div>

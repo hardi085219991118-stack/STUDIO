@@ -57,7 +57,7 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
         <div className="bg-[#18191c] border-b border-[#2b2d30] px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <FolderPlus className="w-4 h-4 text-[#3574f0]" />
-            <h2 className="font-bold text-white text-sm">New Project Wizard</h2>
+            <h2 className="font-bold text-white text-sm">Panduan Proyek Baru</h2>
           </div>
           <button onClick={onClose} className="p-1 rounded hover:bg-[#2b2d30] text-gray-400 hover:text-white">
             <X className="w-4 h-4" />
@@ -67,9 +67,9 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
         {/* Step 1: Select Template */}
         {step === 1 && (
           <div className="flex-1 p-4 overflow-y-auto flex flex-col">
-            <h3 className="text-white font-bold mb-2">Choose a Project Template</h3>
+            <h3 className="text-white font-bold mb-2">Pilih Template Proyek</h3>
             <p className="text-gray-400 text-[11px] mb-4">
-              Select a template to generate full project structure with Activity, layouts, and Gradle configurations.
+              Pilih template untuk menghasilkan struktur proyek lengkap dengan Activity, layout, dan konfigurasi Gradle.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
@@ -107,10 +107,10 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
         {/* Step 2: Configure Project Settings */}
         {step === 2 && (
           <div className="flex-1 p-4 overflow-y-auto space-y-3 font-mono">
-            <h3 className="text-white font-bold mb-2 font-sans">Configure Your Project</h3>
+            <h3 className="text-white font-bold mb-2 font-sans">Konfigurasi Proyek Anda</h3>
 
             <div>
-              <label className="text-[11px] text-gray-400 block mb-1">Application Name</label>
+              <label className="text-[11px] text-gray-400 block mb-1">Nama Aplikasi</label>
               <input
                 type="text"
                 value={appName}
@@ -120,7 +120,7 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
             </div>
 
             <div>
-              <label className="text-[11px] text-gray-400 block mb-1">Package Name</label>
+              <label className="text-[11px] text-gray-400 block mb-1">Nama Package</label>
               <input
                 type="text"
                 value={packageName}
@@ -131,19 +131,19 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[11px] text-gray-400 block mb-1">Language</label>
+                <label className="text-[11px] text-gray-400 block mb-1">Bahasa</label>
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value as 'Kotlin' | 'Java')}
                   className="w-full bg-[#121316] border border-[#393b40] rounded px-2.5 py-2 text-white text-xs"
                 >
-                  <option value="Kotlin">Kotlin (Recommended)</option>
+                  <option value="Kotlin">Kotlin (Disarankan)</option>
                   <option value="Java">Java</option>
                 </select>
               </div>
 
               <div>
-                <label className="text-[11px] text-gray-400 block mb-1">Minimum SDK</label>
+                <label className="text-[11px] text-gray-400 block mb-1">SDK Minimum</label>
                 <select
                   value={minSdk}
                   onChange={(e) => setMinSdk(Number(e.target.value))}
@@ -159,13 +159,13 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
             </div>
 
             <div>
-              <label className="text-[11px] text-gray-400 block mb-1">Build Configuration Language</label>
+              <label className="text-[11px] text-gray-400 block mb-1">Bahasa Konfigurasi Build</label>
               <select
                 value={buildSystem}
                 onChange={(e) => setBuildSystem(e.target.value as any)}
                 className="w-full bg-[#121316] border border-[#393b40] rounded px-2.5 py-2 text-white text-xs"
               >
-                <option value="Gradle (Kotlin DSL)">Kotlin DSL (build.gradle.kts) - Recommended</option>
+                <option value="Gradle (Kotlin DSL)">Kotlin DSL (build.gradle.kts) - Disarankan</option>
                 <option value="Gradle (Groovy)">Groovy DSL (build.gradle)</option>
               </select>
             </div>
@@ -180,7 +180,7 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
               className="px-3 py-1.5 rounded bg-[#2b2d30] text-gray-300 hover:text-white flex items-center gap-1"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back</span>
+              <span>Kembali</span>
             </button>
           ) : <div />}
 
@@ -189,7 +189,7 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
               onClick={onClose}
               className="px-3 py-1.5 rounded bg-[#2b2d30] text-gray-300 hover:bg-[#35373c]"
             >
-              Cancel
+              Batal
             </button>
 
             {step === 1 ? (
@@ -197,7 +197,7 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
                 onClick={() => setStep(2)}
                 className="px-4 py-1.5 rounded bg-[#3574f0] hover:bg-[#2b64d6] text-white font-bold flex items-center gap-1"
               >
-                <span>Next</span>
+                <span>Lanjut</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             ) : (
@@ -205,7 +205,7 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
                 onClick={handleFinish}
                 className="px-4 py-1.5 rounded bg-[#3ddc84] hover:bg-[#46e68d] text-[#121316] font-bold"
               >
-                Create Project
+                Buat Proyek
               </button>
             )}
           </div>

@@ -249,7 +249,7 @@ export const ManifestEditor: React.FC<ManifestEditorProps> = ({
           <ShieldCheck className="w-3.5 h-3.5 text-[#3ddc84]" />
           <span className="font-semibold text-white">AndroidManifest.xml</span>
           <span className="text-[10px] bg-[#3ddc84]/10 text-[#3ddc84] font-mono px-1.5 py-0.5 rounded border border-[#3ddc84]/30">
-            DYNAMIC PARSER
+            PARSER DINAMIS
           </span>
         </div>
 
@@ -264,7 +264,7 @@ export const ManifestEditor: React.FC<ManifestEditorProps> = ({
             onClick={() => setActiveTab('xml')}
             className={`px-2.5 py-0.5 rounded text-[11px] ${activeTab === 'xml' ? 'bg-[#3574f0] text-white font-medium' : 'text-gray-400'}`}
           >
-            Raw XML
+            XML Mentah
           </button>
         </div>
       </div>
@@ -272,7 +272,7 @@ export const ManifestEditor: React.FC<ManifestEditorProps> = ({
       {parseError && (
         <div className="bg-red-500/10 border-b border-red-500/30 px-3 py-1.5 flex items-center space-x-2 text-xs text-red-300 font-mono">
           <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
-          <span>XML Syntax Error: {parseError}</span>
+          <span>Kesalahan Sintaksis XML: {parseError}</span>
         </div>
       )}
 
@@ -285,17 +285,17 @@ export const ManifestEditor: React.FC<ManifestEditorProps> = ({
               <div className="flex items-center justify-between text-xs pb-2 border-b border-[#393b40]">
                 <span className="font-bold text-white flex items-center gap-1.5">
                   <Settings2 className="w-3.5 h-3.5 text-[#3574f0]" />
-                  <span>Package & Application Info</span>
+                  <span>Info Paket & Aplikasi</span>
                 </span>
                 <span className="text-[10px] text-gray-400">Target SDK: 34</span>
               </div>
               <div className="grid grid-cols-2 gap-3 text-[11px]">
                 <div>
-                  <span className="text-gray-400 block text-[10px]">Package / Namespace:</span>
-                  <span className="text-[#3ddc84] font-semibold">{parsedManifest.packageName || 'Defined in build.gradle.kts'}</span>
+                  <span className="text-gray-400 block text-[10px]">Paket / Namespace:</span>
+                  <span className="text-[#3ddc84] font-semibold">{parsedManifest.packageName || 'Didefinisikan di build.gradle.kts'}</span>
                 </div>
                 <div>
-                  <span className="text-gray-400 block text-[10px]">Application Label:</span>
+                  <span className="text-gray-400 block text-[10px]">Label Aplikasi:</span>
                   <span className="text-white">{parsedManifest.application.label || '@string/app_name'}</span>
                 </div>
               </div>
@@ -307,7 +307,7 @@ export const ManifestEditor: React.FC<ManifestEditorProps> = ({
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-bold text-white flex items-center gap-1.5 text-xs">
                 <ShieldCheck className="w-4 h-4 text-[#3ddc84]" />
-                <span>Declared Permissions ({parsedManifest?.permissions.length || 0})</span>
+                <span>Izin Dideklarasikan ({parsedManifest?.permissions.length || 0})</span>
               </h3>
             </div>
 
@@ -326,7 +326,7 @@ export const ManifestEditor: React.FC<ManifestEditorProps> = ({
                     <button
                       onClick={() => handleRemovePermission(perm)}
                       className="p-1 hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded transition-colors"
-                      title="Remove Permission"
+                      title="Hapus Izin"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -334,18 +334,18 @@ export const ManifestEditor: React.FC<ManifestEditorProps> = ({
                 ))
               ) : (
                 <div className="p-3 bg-[#2b2d30]/50 border border-dashed border-[#393b40] rounded-lg text-center text-gray-400 text-xs">
-                  No permissions currently declared in manifest.
+                  Tidak ada izin yang dideklarasikan dalam manifes.
                 </div>
               )}
             </div>
 
             {/* Add Custom / Suggested Permission */}
             <div className="bg-[#18191c] p-3 rounded-lg border border-[#2b2d30] space-y-2">
-              <div className="text-[10px] text-gray-400 font-bold uppercase">Add New Permission</div>
+              <div className="text-[10px] text-gray-400 font-bold uppercase">Tambah Izin Baru</div>
               <div className="flex items-center space-x-2">
                 <input
                   type="text"
-                  placeholder="e.g. android.permission.CAMERA"
+                  placeholder="mis. android.permission.CAMERA"
                   value={newPermissionInput}
                   onChange={(e) => setNewPermissionInput(e.target.value)}
                   className="flex-1 bg-[#2b2d30] border border-[#393b40] rounded px-2.5 py-1.5 text-white font-mono text-xs focus:outline-none focus:border-[#3574f0]"
@@ -355,7 +355,7 @@ export const ManifestEditor: React.FC<ManifestEditorProps> = ({
                   className="px-3 py-1.5 rounded bg-[#3574f0] hover:bg-[#2b64d6] text-white font-bold text-xs flex items-center space-x-1"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>Add</span>
+                  <span>Tambah</span>
                 </button>
               </div>
 
@@ -386,7 +386,7 @@ export const ManifestEditor: React.FC<ManifestEditorProps> = ({
           <div>
             <h3 className="font-bold text-white mb-2 flex items-center gap-1.5 text-xs">
               <ActivityIcon className="w-4 h-4 text-[#3574f0]" />
-              <span>Registered Activities ({parsedManifest?.activities.length || 0})</span>
+              <span>Activity Terdaftar ({parsedManifest?.activities.length || 0})</span>
             </h3>
 
             <div className="space-y-2 mb-3">
@@ -413,7 +413,7 @@ export const ManifestEditor: React.FC<ManifestEditorProps> = ({
                             ? 'bg-[#3ddc84]/10 border-[#3ddc84]/40 text-[#3ddc84]'
                             : 'bg-gray-700/30 border-gray-600 text-gray-400'
                         }`}
-                        title="Toggle android:exported attribute"
+                        title="Toggle atribut android:exported"
                       >
                         exported="{act.exported}"
                       </button>
@@ -421,7 +421,7 @@ export const ManifestEditor: React.FC<ManifestEditorProps> = ({
                       <button
                         onClick={() => handleRemoveActivity(act.name)}
                         className="p-1 hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded"
-                        title="Delete Activity"
+                        title="Hapus Activity"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -430,7 +430,7 @@ export const ManifestEditor: React.FC<ManifestEditorProps> = ({
 
                   {act.actions.length > 0 && (
                     <div className="text-[10px] text-gray-400">
-                      <span>Actions: </span>
+                      <span>Aksi: </span>
                       <span className="text-gray-300">{act.actions.join(', ')}</span>
                     </div>
                   )}
@@ -442,7 +442,7 @@ export const ManifestEditor: React.FC<ManifestEditorProps> = ({
             <div className="flex items-center space-x-2 bg-[#18191c] p-2.5 rounded-lg border border-[#2b2d30]">
               <input
                 type="text"
-                placeholder="New Activity name (e.g. .DetailActivity)"
+                placeholder="Nama Activity baru (mis. .DetailActivity)"
                 value={newActivityInput}
                 onChange={(e) => setNewActivityInput(e.target.value)}
                 className="flex-1 bg-[#2b2d30] border border-[#393b40] rounded px-2.5 py-1 text-white font-mono text-xs focus:outline-none focus:border-[#3574f0]"
@@ -452,7 +452,7 @@ export const ManifestEditor: React.FC<ManifestEditorProps> = ({
                 className="px-3 py-1 rounded bg-[#3574f0] hover:bg-[#2b64d6] text-white font-bold text-xs flex items-center space-x-1"
               >
                 <Plus className="w-3 h-3" />
-                <span>Add Activity</span>
+                <span>Tambah Activity</span>
               </button>
             </div>
           </div>
