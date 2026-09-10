@@ -8,6 +8,8 @@ import { createApkRouter } from './server/apkRoutes';
 import { createGitRouter } from './server/gitRoutes';
 import { createSdkRouter } from './server/sdkRoutes';
 import { createGradleRouter } from './server/gradleRoutes';
+import { createAiRouter } from './server/aiRoutes';
+import { detectBuildEnvironment } from './server/envDetection';
 
 const app = express();
 const PORT = 3000;
@@ -26,6 +28,7 @@ app.use('/api/apk', createApkRouter(WORKSPACE_DIR));
 app.use('/api/git', createGitRouter(WORKSPACE_DIR));
 app.use('/api/sdk', createSdkRouter(WORKSPACE_DIR));
 app.use('/api/gradle', createGradleRouter(WORKSPACE_DIR));
+app.use('/api/ai', createAiRouter(WORKSPACE_DIR));
 
 // Helper: Safe path resolution to prevent path traversal
 function resolveSafePath(projectName: string, relativePath: string): string {
@@ -121,79 +124,73 @@ app.post('/api/terminal/exec', (req, res) => {
   });
 });
 
-// 3. API: Real Build Environment Toolchain Probe
+// 3. API: Real Build Environment Toolchain Probe & Auto-Diagnostics
 app.get('/api/build/environment', async (req, res) => {
   try {
-    const [javaInfo, gradleInfo, adbInfo, aapt2Info, d8Info, apksignerInfo, zipalignInfo] = await Promise.all([
-      probeCommand('java'),
-      probeCommand('gradle'),
-      probeCommand('adb'),
-      probeCommand('aapt2'),
-      probeCommand('d8'),
-      probeCommand('apksigner'),
-      probeCommand('zipalign'),
-    ]);
-
-    const javaHome = process.env.JAVA_HOME || '';
-    const androidHome = process.env.ANDROID_HOME || process.env.ANDROID_SDK_ROOT || '';
-    const hasAndroidSdk = Boolean(androidHome && fs.existsSync(androidHome));
-
-    const isBuildReady = javaInfo.available && (gradleInfo.available || fs.existsSync(path.join(process.cwd(), 'gradlew'))) && hasAndroidSdk;
-    const limitationReason = !isBuildReady
-      ? 'Android build toolchain is incomplete in the current container sandbox: Java (JDK 17+), Gradle, and Android SDK (AAPT2/D8) are required for native APK compilation.'
-      : undefined;
+    const diag = await detectBuildEnvironment(WORKSPACE_DIR);
 
     res.json({
       success: true,
-      platform: process.platform,
-      arch: process.arch,
-      nodeVersion: process.version,
-      isBuildReady,
-      limitationReason,
-      status: isBuildReady ? 'READY_FOR_ANDRIOD_BUILD' : 'BUILD_TOOLCHAIN_INCOMPLETE',
+      platform: diag.system.platform,
+      arch: diag.system.arch,
+      nodeVersion: diag.system.nodeVersion,
+      isBuildReady: diag.isBuildReady,
+      overallStatus: diag.overallStatus,
+      status: diag.overallStatus,
+      limitationReason: diag.limitationReason,
+      missingTools: diag.missingTools,
+      java: diag.java,
+      androidSdk: diag.androidSdk,
+      buildTools: diag.buildTools,
+      platformTools: diag.platform,
+      platformInfo: diag.platform,
+      gradle: diag.gradle,
+      aapt2: diag.aapt2,
+      d8: diag.d8,
+      apksigner: diag.apksigner,
+      zipalign: diag.zipalign,
       tools: {
         java: {
-          available: javaInfo.available,
-          version: javaInfo.version,
-          path: javaInfo.path,
-          javaHome: javaHome || 'Not configured in environment',
+          available: diag.java.detected,
+          version: diag.java.version,
+          path: diag.java.path,
+          javaHome: diag.java.javaHome,
           requiredVersion: '17+',
         },
         gradle: {
-          available: gradleInfo.available,
-          version: gradleInfo.version,
-          path: gradleInfo.path,
+          available: diag.gradle.detected,
+          version: diag.gradle.version,
+          path: diag.gradle.path,
           requiredVersion: '8.0+',
         },
         androidSdk: {
-          available: hasAndroidSdk,
-          path: androidHome || 'Not configured in environment (ANDROID_HOME)',
+          available: diag.androidSdk.detected,
+          path: diag.androidSdk.sdkPath,
+          androidHome: diag.androidSdk.androidHome,
+          androidSdkRoot: diag.androidSdk.androidSdkRoot,
           compileSdk: 34,
         },
+        buildTools: diag.buildTools,
+        platform: diag.platform,
         aapt2: {
-          available: aapt2Info.available,
-          version: aapt2Info.version,
-          path: aapt2Info.path,
+          available: diag.aapt2.detected,
+          version: diag.aapt2.version,
+          path: diag.aapt2.path,
         },
         d8: {
-          available: d8Info.available,
-          version: d8Info.version,
-          path: d8Info.path,
+          available: diag.d8.detected,
+          version: diag.d8.version,
+          path: diag.d8.path,
         },
         apksigner: {
-          available: apksignerInfo.available,
-          version: apksignerInfo.version,
-          path: apksignerInfo.path,
+          available: diag.apksigner.detected,
+          version: diag.apksigner.version,
+          path: diag.apksigner.path,
         },
         zipalign: {
-          available: zipalignInfo.available,
-          version: zipalignInfo.version,
-          path: zipalignInfo.path,
-        },
-        adb: {
-          available: adbInfo.available,
-          version: adbInfo.version,
-          path: adbInfo.path,
+          available: diag.zipalign.detected,
+          version: diag.zipalign.version,
+          path: diag.zipalign.path,
         },
       },
     });
@@ -349,11 +346,13 @@ app.post('/api/fs/mkdir', (req, res) => {
 // 10. API: Save Entire Project to Disk
 app.post('/api/fs/save-project', (req, res) => {
   try {
-    const { config, files } = req.body;
-    if (!config || !config.name || !Array.isArray(files)) {
+    const projectName = req.body.projectName || req.body.config?.name || 'MyApplication';
+    const config = req.body.config || { name: projectName };
+    const files = req.body.files;
+    if (!projectName || !Array.isArray(files)) {
       return res.status(400).json({ success: false, error: 'Invalid project payload' });
     }
-    const safeName = path.basename(config.name);
+    const safeName = path.basename(projectName);
     const projectPath = path.join(WORKSPACE_DIR, safeName);
     fs.mkdirSync(projectPath, { recursive: true });
 
@@ -374,44 +373,104 @@ app.post('/api/fs/save-project', (req, res) => {
   }
 });
 
+// 10b. API: Load Entire Project Files from Disk
+app.get('/api/fs/load-project', (req, res) => {
+  try {
+    const projectName = (req.query.projectName as string) || 'MyApplication';
+    const safeName = path.basename(projectName);
+    const projectPath = path.join(WORKSPACE_DIR, safeName);
+    if (!fs.existsSync(projectPath)) {
+      return res.status(404).json({ success: false, error: 'Project not found' });
+    }
+
+    const loadedFiles: { id: string; name: string; path: string; content: string; type: string }[] = [];
+
+    function scan(dir: string, relPrefix = '') {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.name === 'build' || entry.name === '.gradle' || entry.name === '.git' || entry.name === 'node_modules') {
+          continue;
+        }
+        const full = path.join(dir, entry.name);
+        const rel = relPrefix ? `${relPrefix}/${entry.name}` : entry.name;
+        if (entry.isDirectory()) {
+          scan(full, rel);
+        } else {
+          try {
+            const content = fs.readFileSync(full, 'utf-8');
+            let type = 'file';
+            if (entry.name.endsWith('.kt')) type = 'kotlin';
+            else if (entry.name.endsWith('.java')) type = 'java';
+            else if (entry.name.endsWith('.xml')) type = 'xml';
+            else if (entry.name.endsWith('.gradle') || entry.name.endsWith('.gradle.kts')) type = 'gradle';
+            else if (entry.name.endsWith('.json')) type = 'json';
+            else if (entry.name.endsWith('.properties')) type = 'properties';
+
+            loadedFiles.push({
+              id: 'file-' + rel.replace(/[^a-zA-Z0-9]/g, '_'),
+              name: entry.name,
+              path: rel,
+              content,
+              type,
+            });
+          } catch (e) {
+            // ignore binary files
+          }
+        }
+      }
+    }
+
+    scan(projectPath);
+    res.json({ success: true, projectName: safeName, files: loadedFiles });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // 11. API: Real Gradle Build / Build Verification (Non-Falsified)
 app.post('/api/build/gradle', async (req, res) => {
   const { projectName, task = 'assembleDebug' } = req.body;
   const projectDir = path.join(WORKSPACE_DIR, path.basename(projectName || 'MyApplication'));
 
-  const [javaInfo, gradleInfo] = await Promise.all([
-    probeCommand('java'),
-    probeCommand('gradle'),
-  ]);
+  const diag = await detectBuildEnvironment(WORKSPACE_DIR);
 
-  const hasGradlew = fs.existsSync(path.join(projectDir, 'gradlew'));
-
-  if (!javaInfo.available) {
+  if (!diag.isBuildReady) {
     return res.json({
       success: false,
-      status: 'BUILD_LIMITED_BY_ENVIRONMENT',
-      error: 'BUILD LIMITED BY ENVIRONMENT',
-      reason: 'Java Development Kit (JDK 17+) is not installed in the container environment. Android Gradle Plugin cannot execute without a valid JVM.',
+      status: diag.overallStatus === 'ANDROID_BUILD_ENVIRONMENT_UNAVAILABLE'
+        ? 'ANDROID_BUILD_ENVIRONMENT_UNAVAILABLE'
+        : 'BUILD_LIMITED_BY_ENVIRONMENT',
+      error: diag.overallStatus,
+      reason: diag.limitationReason || 'Lingkungan build Android riil belum lengkap di sistem host.',
+      missingTools: diag.missingTools,
+      diagnostics: diag,
       logs: [
         {
           id: 'log-1',
           timestamp: new Date().toLocaleTimeString(),
           phase: 'INITIALIZATION',
           level: 'error',
-          message: 'ERROR: JAVA_HOME is not set and no "java" command could be found in your PATH.',
+          message: `DIAGNOSTIK: ${diag.overallStatus}`,
         },
         {
           id: 'log-2',
           timestamp: new Date().toLocaleTimeString(),
           phase: 'INITIALIZATION',
           level: 'warn',
-          message: 'STATUS: BUILD LIMITED BY ENVIRONMENT. Native JDK and Android SDK toolchain missing in container.',
+          message: `Komponen tidak tersedia: ${diag.missingTools.join(', ') || 'JDK/Android SDK'}`,
+        },
+        {
+          id: 'log-3',
+          timestamp: new Date().toLocaleTimeString(),
+          phase: 'INITIALIZATION',
+          level: 'info',
+          message: 'STATUS: Tidak dapat menjalankan kompilasi native APK tanpa toolchain nyata.',
         },
       ],
     });
   }
 
-  // If java is available, execute real command
+  const hasGradlew = fs.existsSync(path.join(projectDir, 'gradlew'));
   const gradleCmd = hasGradlew ? `./gradlew ${task}` : `gradle ${task}`;
   const startTime = Date.now();
 

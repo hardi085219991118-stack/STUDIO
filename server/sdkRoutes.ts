@@ -2,6 +2,7 @@ import { Router } from 'express';
 import fs from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
+import { detectBuildEnvironment } from './envDetection';
 
 export function createSdkRouter(workspaceDir: string): Router {
   const router = Router();
@@ -150,6 +151,20 @@ export function createSdkRouter(workspaceDir: string): Router {
           apksigner: apksignerInfo,
           zipalign: zipalignInfo,
         },
+      });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // 1b. GET /api/sdk/diagnostics
+  // Real build environment diagnostics with auto-resolved JDK, SDK, and build tools
+  router.get('/diagnostics', async (req, res) => {
+    try {
+      const diagnostics = await detectBuildEnvironment(workspaceDir);
+      res.json({
+        success: true,
+        ...diagnostics,
       });
     } catch (err: any) {
       res.status(500).json({ success: false, error: err.message });

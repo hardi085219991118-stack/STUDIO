@@ -3,7 +3,7 @@ import {
   Play, Bug, Square, Hammer, Save, RotateCcw, RotateCw, 
   Search, RefreshCw, Smartphone, Terminal, AlignLeft, 
   Settings, FolderPlus, FolderOpen, Layers, CheckCircle2, ChevronDown,
-  Package, GitBranch, AlertTriangle
+  Package, GitBranch, AlertTriangle, Bot, Activity, Sparkles
 } from 'lucide-react';
 import { DeviceInfo, BuildTaskType } from '../types';
 
@@ -26,6 +26,8 @@ interface ToolbarProps {
   onOpenLayoutEditor: () => void;
   onOpenApkManager?: () => void;
   onOpenGit?: () => void;
+  onOpenAiBuilder?: () => void;
+  onOpenBuildDiagnostics?: () => void;
   devices: DeviceInfo[];
   selectedDevice: DeviceInfo | null;
   onSelectDevice: (device: DeviceInfo | null) => void;
@@ -53,6 +55,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onOpenLayoutEditor,
   onOpenApkManager,
   onOpenGit,
+  onOpenAiBuilder,
+  onOpenBuildDiagnostics,
   devices,
   selectedDevice,
   onSelectDevice,
@@ -277,6 +281,27 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       {/* Right group: Fast panel toggles */}
       <div className="flex items-center space-x-1 shrink-0">
+        {onOpenAiBuilder && (
+          <button
+            id="btn-open-ai-builder"
+            onClick={onOpenAiBuilder}
+            title="AI App Builder & Coding Agent (Android Studio Mobile)"
+            className="flex items-center space-x-1.5 px-2 py-1 rounded bg-[#3574f0]/15 hover:bg-[#3574f0]/30 text-[#3574f0] border border-[#3574f0]/40 text-xs font-semibold transition-all shadow-xs"
+          >
+            <Bot className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline font-bold">AI Builder</span>
+          </button>
+        )}
+        {onOpenBuildDiagnostics && (
+          <button
+            id="btn-open-build-diagnostics"
+            onClick={onOpenBuildDiagnostics}
+            title="Diagnostik Lingkungan Build Host (Auto-Detect)"
+            className="p-1.5 rounded hover:bg-[#2b2d30] text-[#bcbec4] hover:text-[#3ddc84] transition-colors"
+          >
+            <Activity className="w-3.5 h-3.5" />
+          </button>
+        )}
         {onOpenApkManager && (
           <button
             id="btn-open-apk-manager"

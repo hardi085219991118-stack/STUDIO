@@ -26,6 +26,8 @@ import { ResourceManager } from './components/ResourceManager';
 import { SdkManagerModal } from './components/SdkManagerModal';
 import { GitPanel } from './components/GitPanel';
 import { ApkManagerPanel } from './components/ApkManagerPanel';
+import { BuildDiagnosticsModal } from './components/BuildDiagnosticsModal';
+import { AiAppBuilderModal } from './components/AiAppBuilderModal';
 import { AdbService } from './services/AdbService';
 import { ApkService } from './services/ApkService';
 import { GradleService } from './services/GradleService';
@@ -131,6 +133,27 @@ export default function App() {
   const [showSdkManagerModal, setShowSdkManagerModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showGitModal, setShowGitModal] = useState(false);
+  const [showAiAppBuilder, setShowAiAppBuilder] = useState(false);
+  const [showBuildDiagnostics, setShowBuildDiagnostics] = useState(false);
+
+  // Reload project files from disk after external/AI modifications
+  const reloadProjectFiles = async () => {
+    try {
+      const res = await fetch(`/api/fs/load-project?projectName=${encodeURIComponent(projectConfig.name)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.files) && data.files.length > 0) {
+          setFiles(data.files);
+          setOpenTabs(prev => prev.map(tab => {
+            const updated = data.files.find((f: ProjectFile) => f.path === tab.filePath);
+            return updated ? { ...tab, content: updated.content } : tab;
+          }));
+        }
+      }
+    } catch (e) {
+      console.warn('Gagal memuat ulang berkas proyek:', e);
+    }
+  };
 
   // Settings
   const [settings, setSettings] = useState<IdeSettings>(() => {
@@ -1163,6 +1186,8 @@ export default function App() {
         onOpenLayoutEditor={() => setShowLayoutDesigner(true)}
         onOpenGit={() => setShowGitModal(true)}
         onOpenApkManager={() => { setBottomTab('apk'); setIsBottomOpen(true); }}
+        onOpenAiBuilder={() => setShowAiAppBuilder(true)}
+        onOpenBuildDiagnostics={() => setShowBuildDiagnostics(true)}
         toggleSplit={setSplitMode}
       />
 
@@ -1186,6 +1211,8 @@ export default function App() {
         onOpenLayoutEditor={() => setShowLayoutDesigner(true)}
         onOpenApkManager={() => { setBottomTab('apk'); setIsBottomOpen(true); }}
         onOpenGit={() => setShowGitModal(true)}
+        onOpenAiBuilder={() => setShowAiAppBuilder(true)}
+        onOpenBuildDiagnostics={() => setShowBuildDiagnostics(true)}
         devices={devices}
         selectedDevice={selectedDevice}
         onSelectDevice={setSelectedDevice}
@@ -1524,6 +1551,29 @@ export default function App() {
         <GitPanel
           onClose={() => setShowGitModal(false)}
           projectName={projectConfig.name}
+        />
+      )}
+
+      {showAiAppBuilder && (
+        <AiAppBuilderModal
+          projectName={projectConfig.name}
+          files={files}
+          onClose={() => setShowAiAppBuilder(false)}
+          onProjectUpdated={reloadProjectFiles}
+          onOpenFile={(path) => {
+            const f = files.find(file => file.path === path);
+            if (f) handleOpenFile(f);
+          }}
+        />
+      )}
+
+      {showBuildDiagnostics && (
+        <BuildDiagnosticsModal
+          onClose={() => setShowBuildDiagnostics(false)}
+          onOpenSdkManager={() => {
+            setShowBuildDiagnostics(false);
+            setShowSdkManagerModal(true);
+          }}
         />
       )}
     </div>

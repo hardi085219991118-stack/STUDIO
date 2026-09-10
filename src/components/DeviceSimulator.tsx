@@ -130,10 +130,10 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = ({
 
       {/* Distinction Badge */}
       <div className="w-full max-w-sm mb-2 px-2 flex items-center justify-between text-[10px] text-gray-400">
-        <span className="bg-[#3574f0]/10 text-[#3574f0] border border-[#3574f0]/30 px-1.5 py-0.5 rounded font-mono font-semibold">
-          PRATINJAU TERSIMULASI (Sandbox Interaktif)
+        <span className="bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded font-mono font-semibold">
+          SIMULATOR / PREVIEW — BUKAN PERANGKAT ANDROID NYATA
         </span>
-        <span className="text-[9px] text-gray-500">Uji Cepat Event UI</span>
+        <span className="text-[9px] text-gray-500">Pratinjau UI Interaktif</span>
       </div>
 
       {/* Phone Body Frame */}

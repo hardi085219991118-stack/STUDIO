@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Folder, FilePlus, Save, Play, Bug, Hammer, Terminal, 
   Settings, HelpCircle, GitBranch, Cpu, Eye, Code, Search, 
-  Maximize2, Minimize2, Check, RefreshCw, Smartphone
+  Maximize2, Minimize2, Check, RefreshCw, Smartphone, Bot, Sparkles, Activity
 } from 'lucide-react';
 import { BuildTaskType } from '../types';
 
@@ -26,6 +26,8 @@ interface TopMenuBarProps {
   onOpenApkManager?: () => void;
   onOpenDependencies?: () => void;
   onSyncGradle?: () => void;
+  onOpenAiBuilder?: () => void;
+  onOpenBuildDiagnostics?: () => void;
   toggleSplit: (mode: 'none' | 'vertical' | 'horizontal') => void;
   projectName: string;
   isSaving?: boolean;
@@ -51,6 +53,8 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
   onOpenApkManager,
   onOpenDependencies,
   onSyncGradle,
+  onOpenAiBuilder,
+  onOpenBuildDiagnostics,
   toggleSplit,
   projectName,
   isSaving = false,
@@ -206,6 +210,12 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
                   Kelola Dependensi...
                 </button>
               )}
+              {onOpenBuildDiagnostics && (
+                <button onClick={() => executeAndClose(onOpenBuildDiagnostics)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center justify-between text-[#3ddc84]">
+                  <span>Diagnostik Environment Build (Auto-Detect)...</span>
+                  <Activity className="w-3 h-3" />
+                </button>
+              )}
               <div className="h-[1px] bg-[#393b40] my-1" />
               <button onClick={() => executeAndClose(() => onBuild('assembleDebug'))} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex justify-between">
                 <span>Assemble Debug APK</span>
@@ -293,6 +303,34 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
               <button onClick={() => executeAndClose(onOpenLogcat)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white">
                 Logcat
               </button>
+            </div>
+          )}
+        </div>
+
+        {/* AI Menu */}
+        <div className="relative">
+          <button
+            id="menu-btn-ai"
+            onClick={() => handleMenuClick('AI')}
+            className={`px-2.5 py-1 rounded hover:bg-[#2b2d30] transition-colors whitespace-nowrap text-[#3574f0] font-bold flex items-center space-x-1 ${activeMenu === 'AI' ? 'bg-[#2b2d30]' : ''}`}
+          >
+            <Bot className="w-3.5 h-3.5" />
+            <span>AI</span>
+          </button>
+          {activeMenu === 'AI' && (
+            <div className="absolute left-0 top-full mt-0.5 w-64 bg-[#2b2d30] border border-[#393b40] rounded shadow-xl py-1 text-xs z-50">
+              {onOpenAiBuilder && (
+                <button onClick={() => executeAndClose(onOpenAiBuilder)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center justify-between text-[#3574f0]">
+                  <span>AI App Builder & Coding Agent...</span>
+                  <Sparkles className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {onOpenBuildDiagnostics && (
+                <button onClick={() => executeAndClose(onOpenBuildDiagnostics)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center justify-between">
+                  <span>Diagnostik Lingkungan Build Host...</span>
+                  <Activity className="w-3 h-3 text-[#3ddc84]" />
+                </button>
+              )}
             </div>
           )}
         </div>
