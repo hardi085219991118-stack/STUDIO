@@ -23,10 +23,12 @@ import { DependenciesModal } from './components/DependenciesModal';
 import { SettingsModal } from './components/SettingsModal';
 import { ManifestEditor } from './components/ManifestEditor';
 import { ResourceManager } from './components/ResourceManager';
+import { SdkManagerModal } from './components/SdkManagerModal';
 import { GitPanel } from './components/GitPanel';
 import { ApkManagerPanel } from './components/ApkManagerPanel';
 import { AdbService } from './services/AdbService';
 import { ApkService } from './services/ApkService';
+import { GradleService } from './services/GradleService';
 import { 
   Terminal as TerminalIcon, Hammer, Smartphone, 
   ChevronUp, ChevronDown, Package, GitBranch
@@ -61,6 +63,7 @@ export default function App() {
   const [clipboard, setClipboard] = useState<FileClipboard | null>(null);
   const [splitMode, setSplitMode] = useState<SplitMode>('none');
   const [showLayoutDesigner, setShowLayoutDesigner] = useState(false);
+  const [selectedLayoutFileId, setSelectedLayoutFileId] = useState<string | null>(null);
   const [showManifestEditor, setShowManifestEditor] = useState(false);
   const [showResourceManager, setShowResourceManager] = useState(false);
 
@@ -125,6 +128,7 @@ export default function App() {
   const [showDeviceManagerModal, setShowDeviceManagerModal] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showDependenciesModal, setShowDependenciesModal] = useState(false);
+  const [showSdkManagerModal, setShowSdkManagerModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showGitModal, setShowGitModal] = useState(false);
 
@@ -271,6 +275,7 @@ export default function App() {
 
     // Toggle layout designer if xml layout
     if (file.name.endsWith('.xml') && file.path.includes('res/layout')) {
+      setSelectedLayoutFileId(file.id);
       setShowLayoutDesigner(true);
     } else {
       setShowLayoutDesigner(false);
@@ -939,14 +944,200 @@ export default function App() {
       if (tab) {
         handleTabContentChange(tab.id, updated);
       }
+
+      // Sync to disk
+      fetch('/api/fs/write', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectName: projectConfig.name,
+          relativePath: gradleFile.path,
+          content: updated,
+        }),
+      }).catch(err => console.warn('Sync gradle file failed:', err));
     }
   };
 
-  // Active tab file
+  // Remove dependency from build.gradle.kts
+  const handleRemoveDependency = (depRaw: string) => {
+    const gradleFile = files.find(f => f.name === 'build.gradle.kts' || f.name === 'build.gradle');
+    if (!gradleFile) return;
+
+    const lines = gradleFile.content.split('\n');
+    const filtered = lines.filter(l => l.trim() !== depRaw.trim());
+    const updated = filtered.join('\n');
+
+    setFiles(prev => prev.map(f => f.id === gradleFile.id ? { ...f, content: updated } : f));
+    const tab = openTabs.find(t => t.fileId === gradleFile.id);
+    if (tab) {
+      handleTabContentChange(tab.id, updated);
+    }
+
+    fetch('/api/fs/write', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        projectName: projectConfig.name,
+        relativePath: gradleFile.path,
+        content: updated,
+      }),
+    }).catch(err => console.warn('Sync gradle file failed:', err));
+  };
+
+  // Stage 8: Real Gradle Sync
+  const handleSyncGradle = async () => {
+    setBottomTab('build');
+    setIsBottomOpen(true);
+    setIsBuilding(true);
+    setBuildLogs([]);
+    setBuildResult(null);
+    setCurrentBuildPhase('CONFIGURATION');
+
+    const ts = () => new Date().toTimeString().split(' ')[0];
+    setBuildLogs([
+      {
+        id: 'sync-1',
+        timestamp: ts(),
+        phase: 'INITIALIZATION',
+        level: 'info',
+        message: `Starting Gradle Sync for ${projectConfig.name}...`,
+      },
+      {
+        id: 'sync-2',
+        timestamp: ts(),
+        phase: 'CONFIGURATION',
+        level: 'info',
+        message: 'Evaluating root build.gradle.kts and settings.gradle.kts...',
+      }
+    ]);
+
+    try {
+      const syncRes = await GradleService.syncProject(projectConfig.name, files);
+      if (syncRes.status === 'LIMITED_BY_ENVIRONMENT') {
+        setBuildLogs(prev => [
+          ...prev,
+          {
+            id: 'sync-lim-1',
+            timestamp: ts(),
+            phase: 'CONFIGURATION',
+            level: 'warn',
+            message: 'STATUS: LIMITED_BY_ENVIRONMENT',
+          },
+          {
+            id: 'sync-lim-2',
+            timestamp: ts(),
+            phase: 'CONFIGURATION',
+            level: 'warn',
+            message: syncRes.limitationReason || 'Environment lacks Java/Gradle binaries.',
+          },
+          {
+            id: 'sync-lim-3',
+            timestamp: ts(),
+            phase: 'CONFIGURATION',
+            level: 'info',
+            message: syncRes.details?.stdout || 'Project model evaluated against available tooling.',
+          }
+        ]);
+        setBuildResult({
+          success: false,
+          task: 'assembleDebug',
+          durationMs: syncRes.durationMs || 400,
+          errorSummary: {
+            file: 'gradle',
+            line: 1,
+            message: 'BUILD LIMITED BY ENVIRONMENT: ' + (syncRes.limitationReason || 'Missing JDK/Gradle'),
+          }
+        });
+      } else if (syncRes.success) {
+        setBuildLogs(prev => [
+          ...prev,
+          {
+            id: 'sync-ok',
+            timestamp: ts(),
+            phase: 'CONFIGURATION',
+            level: 'success',
+            message: `Gradle Sync completed successfully in ${(syncRes.durationMs / 1000).toFixed(1)}s.`,
+          }
+        ]);
+      } else {
+        setBuildLogs(prev => [
+          ...prev,
+          {
+            id: 'sync-err',
+            timestamp: ts(),
+            phase: 'CONFIGURATION',
+            level: 'error',
+            message: `Gradle Sync failed: ${syncRes.details?.stderr || 'Non-zero exit code'}`,
+          }
+        ]);
+      }
+    } catch (err: any) {
+      setBuildLogs(prev => [
+        ...prev,
+        {
+          id: 'sync-err-catch',
+          timestamp: ts(),
+          phase: 'CONFIGURATION',
+          level: 'error',
+          message: `Gradle Sync error: ${err.message}`,
+        }
+      ]);
+    } finally {
+      setIsBuilding(false);
+      setCurrentBuildPhase(null);
+    }
+  };
+
+  // Active tab file & layouts
   const activeTab = openTabs.find(t => t.id === activeTabId) || null;
+  const layoutFiles = files.filter(f => f.name.endsWith('.xml') && (f.path.includes('res/layout') || f.path.startsWith('res/layout')));
   const activityXmlFile = files.find(f => f.name === 'activity_main.xml');
+  const currentLayoutFile = files.find(f => f.id === selectedLayoutFileId) || layoutFiles[0] || activityXmlFile;
   const manifestXmlFile = files.find(f => f.name === 'AndroidManifest.xml');
   const gradleAppFile = files.find(f => f.name === 'build.gradle.kts' || f.name === 'build.gradle');
+  const versionCatalogFile = files.find(f => f.name === 'libs.versions.toml' || f.path.endsWith('libs.versions.toml'));
+
+  // Create layout file
+  const handleCreateLayoutFile = async (name: string) => {
+    const cleanName = name.endsWith('.xml') ? name : `${name}.xml`;
+    const relativePath = `app/src/main/res/layout/${cleanName}`;
+    const initialXml = `<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Layout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>`;
+    const newFile: ProjectFile = {
+      id: 'file-' + Date.now(),
+      name: cleanName,
+      path: relativePath,
+      content: initialXml,
+      type: 'xml',
+    };
+    setFiles(prev => [...prev, newFile]);
+    setSelectedLayoutFileId(newFile.id);
+    await fetch('/api/fs/write', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        projectName: projectConfig.name,
+        relativePath,
+        content: initialXml,
+      }),
+    });
+  };
 
   return (
     <div className="flex flex-col h-screen w-screen bg-[#1e1f22] text-[#bcbec4] overflow-hidden select-none font-sans">
@@ -962,7 +1153,9 @@ export default function App() {
         onOpenTerminal={() => { setBottomTab('terminal'); setIsBottomOpen(true); }}
         onOpenLogcat={() => { setBottomTab('logcat'); setIsBottomOpen(true); }}
         onOpenDeviceManager={() => setShowDeviceManagerModal(true)}
-        onOpenSdkManager={() => setShowSettingsModal(true)}
+        onOpenSdkManager={() => setShowSdkManagerModal(true)}
+        onOpenDependencies={() => setShowDependenciesModal(true)}
+        onSyncGradle={handleSyncGradle}
         onOpenSettings={() => setShowSettingsModal(true)}
         onSearchEverywhere={() => setShowSearchModal(true)}
         onOpenResourceManager={() => setShowResourceManager(true)}
@@ -985,7 +1178,7 @@ export default function App() {
         onDebug={handleRunApp}
         onStop={handleStopApp}
         onBuild={handleTriggerBuild}
-        onSyncGradle={() => handleTriggerBuild('assembleDebug')}
+        onSyncGradle={handleSyncGradle}
         onToggleTerminal={() => { setBottomTab('terminal'); setIsBottomOpen(!isBottomOpen || bottomTab !== 'terminal'); }}
         onToggleLogcat={() => { setBottomTab('logcat'); setIsBottomOpen(!isBottomOpen || bottomTab !== 'logcat'); }}
         onToggleDeviceManager={() => setShowDeviceManagerModal(true)}
@@ -1026,29 +1219,69 @@ export default function App() {
         <div className="flex-1 flex flex-col h-full bg-[#1e1f22] overflow-hidden">
           {/* Main Content Area */}
           <div className="flex-1 flex flex-col overflow-hidden relative">
-            {showLayoutDesigner && activityXmlFile ? (
+            {showLayoutDesigner && currentLayoutFile ? (
               <LayoutEditor
-                xmlContent={activityXmlFile.content}
+                xmlContent={currentLayoutFile.content}
+                currentFile={currentLayoutFile}
+                allLayoutFiles={layoutFiles}
+                onSelectLayout={(file) => setSelectedLayoutFileId(file.id)}
+                onCreateLayout={handleCreateLayoutFile}
                 onUpdateXml={(newXml) => {
-                  setFiles(prev => prev.map(f => f.id === activityXmlFile.id ? { ...f, content: newXml } : f));
-                  const tab = openTabs.find(t => t.fileId === activityXmlFile.id);
+                  setFiles(prev => prev.map(f => f.id === currentLayoutFile.id ? { ...f, content: newXml } : f));
+                  const tab = openTabs.find(t => t.fileId === currentLayoutFile.id);
                   if (tab) handleTabContentChange(tab.id, newXml);
+                  fetch('/api/fs/write', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      projectName: projectConfig.name,
+                      relativePath: currentLayoutFile.path,
+                      content: newXml,
+                    }),
+                  }).catch(err => console.warn('Sync layout error:', err));
                 }}
                 onClose={() => setShowLayoutDesigner(false)}
               />
             ) : showManifestEditor && manifestXmlFile ? (
               <ManifestEditor
                 content={manifestXmlFile.content}
-                onSaveContent={(newXml) => {
+                onSaveContent={async (newXml) => {
                   setFiles(prev => prev.map(f => f.id === manifestXmlFile.id ? { ...f, content: newXml } : f));
+                  const tab = openTabs.find(t => t.fileId === manifestXmlFile.id);
+                  if (tab) handleTabContentChange(tab.id, newXml);
+                  await fetch('/api/fs/write', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      projectName: projectConfig.name,
+                      relativePath: manifestXmlFile.path,
+                      content: newXml,
+                    }),
+                  });
                 }}
                 onClose={() => setShowManifestEditor(false)}
               />
             ) : showResourceManager ? (
               <ResourceManager
                 files={files}
-                onUpdateFile={(fileId, content) => {
-                  setFiles(prev => prev.map(f => f.id === fileId ? { ...f, content: content } : f));
+                onUpdateFile={async (fileId, content) => {
+                  setFiles(prev => prev.map(f => f.id === fileId ? { ...f, content } : f));
+                  const targetFile = files.find(f => f.id === fileId);
+                  if (targetFile) {
+                    await fetch('/api/fs/write', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        projectName: projectConfig.name,
+                        relativePath: targetFile.path,
+                        content,
+                      }),
+                    });
+                  }
+                }}
+                onOpenLayoutInEditor={(file) => {
+                  setSelectedLayoutFileId(file.id);
+                  setShowLayoutDesigner(true);
                 }}
                 onClose={() => setShowResourceManager(false)}
               />
@@ -1251,7 +1484,31 @@ export default function App() {
         <DependenciesModal
           onClose={() => setShowDependenciesModal(false)}
           onAddDependency={handleAddDependency}
+          onRemoveDependency={handleRemoveDependency}
           currentGradleContent={gradleAppFile?.content || ''}
+          versionCatalogContent={versionCatalogFile?.content || ''}
+          onUpdateVersionCatalog={async (content) => {
+            if (versionCatalogFile) {
+              setFiles(prev => prev.map(f => f.id === versionCatalogFile.id ? { ...f, content } : f));
+              await fetch('/api/fs/write', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  projectName: projectConfig.name,
+                  relativePath: versionCatalogFile.path,
+                  content,
+                }),
+              });
+            }
+          }}
+          onTriggerGradleSync={handleSyncGradle}
+        />
+      )}
+
+      {showSdkManagerModal && (
+        <SdkManagerModal
+          onClose={() => setShowSdkManagerModal(false)}
+          onTriggerGradleSync={handleSyncGradle}
         />
       )}
 

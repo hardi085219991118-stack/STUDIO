@@ -1,16 +1,23 @@
 import React, { useState, useMemo } from 'react';
-import { Package, Plus, Check, Search, X, Trash2, Layers, ExternalLink, AlertCircle } from 'lucide-react';
+import { 
+  Package, Plus, Check, Search, X, Trash2, Layers, 
+  ExternalLink, AlertCircle, RefreshCw, FileCode, CheckCircle2 
+} from 'lucide-react';
+import { ProjectFile } from '../types';
 
 interface DependenciesModalProps {
   onClose: () => void;
   onAddDependency: (depLine: string) => void;
   onRemoveDependency?: (depRaw: string) => void;
   currentGradleContent: string;
+  versionCatalogContent?: string;
+  onUpdateVersionCatalog?: (content: string) => void;
+  onTriggerGradleSync?: () => void;
 }
 
 interface ParsedDependency {
   rawLine: string;
-  config: string; // implementation, testImplementation, etc.
+  config: string;
   coordinate: string;
 }
 
@@ -19,11 +26,16 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
   onAddDependency,
   onRemoveDependency,
   currentGradleContent,
+  versionCatalogContent,
+  onUpdateVersionCatalog,
+  onTriggerGradleSync,
 }) => {
   const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState<'catalog' | 'active'>('catalog');
+  const [activeTab, setActiveTab] = useState<'catalog' | 'active' | 'toml'>('catalog');
   const [customCoord, setCustomCoord] = useState('');
   const [customConfig, setCustomConfig] = useState('implementation');
+  const [tomlText, setTomlText] = useState(versionCatalogContent || '');
+  const [savedTomlSuccess, setSavedTomlSuccess] = useState(false);
 
   // Dynamic parser for current dependencies in Gradle script
   const activeDependencies = useMemo<ParsedDependency[]>(() => {
@@ -78,6 +90,14 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
     setCustomCoord('');
   };
 
+  const handleSaveToml = () => {
+    if (onUpdateVersionCatalog) {
+      onUpdateVersionCatalog(tomlText);
+      setSavedTomlSuccess(true);
+      setTimeout(() => setSavedTomlSuccess(false), 2000);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-3 select-none backdrop-blur-xs">
       <div className="bg-[#1e1f22] border border-[#393b40] rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[85vh] text-xs">
@@ -85,14 +105,30 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
         <div className="bg-[#18191c] border-b border-[#2b2d30] px-4 py-3 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-2">
             <Package className="w-4 h-4 text-[#3574f0]" />
-            <h2 className="font-bold text-white text-sm">Gradle Dependencies</h2>
+            <h2 className="font-bold text-white text-sm">Dependencies & Version Catalog</h2>
             <span className="text-[10px] bg-[#3574f0]/15 text-[#3574f0] px-1.5 py-0.5 rounded font-mono border border-[#3574f0]/30 font-semibold">
-              build.gradle.kts
+              Gradle
             </span>
           </div>
-          <button onClick={onClose} className="p-1 rounded hover:bg-[#2b2d30] text-gray-400 hover:text-white">
-            <X className="w-4 h-4" />
-          </button>
+
+          <div className="flex items-center space-x-2">
+            {onTriggerGradleSync && (
+              <button
+                onClick={() => {
+                  onTriggerGradleSync();
+                  onClose();
+                }}
+                className="px-2 py-1 bg-[#3ddc84]/15 hover:bg-[#3ddc84]/25 border border-[#3ddc84]/30 text-[#3ddc84] rounded font-mono text-[10px] font-semibold flex items-center space-x-1"
+                title="Sync project with Gradle files"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>Sync Now</span>
+              </button>
+            )}
+            <button onClick={onClose} className="p-1 rounded hover:bg-[#2b2d30] text-gray-400 hover:text-white">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Tab switcher */}
@@ -104,7 +140,7 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
                 activeTab === 'catalog' ? 'bg-[#3574f0] text-white' : 'text-gray-400 hover:text-white'
               }`}
             >
-              Add Dependency Catalog
+              Add Dependencies
             </button>
             <button
               onClick={() => setActiveTab('active')}
@@ -117,17 +153,26 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
                 {activeDependencies.length}
               </span>
             </button>
+            <button
+              onClick={() => setActiveTab('toml')}
+              className={`px-3 py-1 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                activeTab === 'toml' ? 'bg-[#3574f0] text-white' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              <FileCode className="w-3 h-3" />
+              <span>libs.versions.toml</span>
+            </button>
           </div>
         </div>
 
-        {/* Search */}
+        {/* Search if in catalog */}
         {activeTab === 'catalog' && (
           <div className="p-3 bg-[#18191c] border-b border-[#2b2d30]">
             <div className="flex items-center space-x-2 bg-[#2b2d30] px-3 py-1.5 rounded border border-[#393b40]">
               <Search className="w-3.5 h-3.5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search Maven / Google dependencies (Retrofit, Room, Compose)..."
+                placeholder="Search Maven dependencies (Retrofit, Room, Coroutines)..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="flex-1 bg-transparent text-white focus:outline-none text-xs"
@@ -142,7 +187,7 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
             <>
               {/* Custom coordinate manual adder */}
               <div className="p-3 bg-[#2b2d30] rounded-xl border border-[#393b40] space-y-2 mb-3">
-                <span className="font-bold text-white text-[11px] block">Add Custom Maven Dependency Coordinate</span>
+                <span className="font-bold text-white text-[11px] block">Add Custom Maven Coordinate</span>
                 <div className="flex items-center space-x-2">
                   <select
                     value={customConfig}
@@ -157,7 +202,7 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
                   </select>
                   <input
                     type="text"
-                    placeholder="group:artifact:version (e.g. com.google.code.gson:gson:2.10.1)"
+                    placeholder="group:artifact:version"
                     value={customCoord}
                     onChange={(e) => setCustomCoord(e.target.value)}
                     className="flex-1 bg-[#1e1f22] border border-[#393b40] rounded px-2.5 py-1.5 text-white font-mono text-xs focus:outline-none focus:border-[#3574f0]"
@@ -210,7 +255,7 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
                 );
               })}
             </>
-          ) : (
+          ) : activeTab === 'active' ? (
             /* Active dependencies view */
             <div className="space-y-2">
               <div className="text-gray-400 text-xs mb-2">
@@ -246,6 +291,33 @@ export const DependenciesModal: React.FC<DependenciesModalProps> = ({
                   </div>
                 ))
               )}
+            </div>
+          ) : (
+            /* Version Catalog Tab */
+            <div className="space-y-3 font-mono">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-300 font-bold text-xs">gradle/libs.versions.toml</span>
+                {savedTomlSuccess && (
+                  <span className="text-[#3ddc84] text-xs flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Saved!</span>
+                  </span>
+                )}
+              </div>
+              <textarea
+                value={tomlText}
+                onChange={(e) => setTomlText(e.target.value)}
+                spellCheck={false}
+                className="w-full h-80 bg-[#18191c] text-[#bcbec4] p-3 font-mono text-xs rounded border border-[#393b40] resize-none focus:outline-none focus:border-[#3574f0]"
+              />
+              <div className="flex justify-end">
+                <button
+                  onClick={handleSaveToml}
+                  className="px-4 py-1.5 bg-[#3574f0] hover:bg-[#2b64d6] text-white rounded font-bold text-xs"
+                >
+                  Save Version Catalog
+                </button>
+              </div>
             </div>
           )}
         </div>

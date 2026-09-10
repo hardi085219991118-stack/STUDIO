@@ -24,6 +24,8 @@ interface TopMenuBarProps {
   onOpenLayoutEditor: () => void;
   onOpenGit?: () => void;
   onOpenApkManager?: () => void;
+  onOpenDependencies?: () => void;
+  onSyncGradle?: () => void;
   toggleSplit: (mode: 'none' | 'vertical' | 'horizontal') => void;
   projectName: string;
   isSaving?: boolean;
@@ -47,6 +49,8 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
   onOpenLayoutEditor,
   onOpenGit,
   onOpenApkManager,
+  onOpenDependencies,
+  onSyncGradle,
   toggleSplit,
   projectName,
   isSaving = false,
@@ -191,6 +195,18 @@ export const TopMenuBar: React.FC<TopMenuBarProps> = ({
           </button>
           {activeMenu === 'Build' && (
             <div className="absolute left-0 top-full mt-0.5 w-64 bg-[#2b2d30] border border-[#393b40] rounded shadow-xl py-1 text-xs z-50">
+              {onSyncGradle && (
+                <button onClick={() => executeAndClose(onSyncGradle)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex items-center justify-between text-[#3574f0]">
+                  <span>Sync Project with Gradle Files</span>
+                  <RefreshCw className="w-3 h-3" />
+                </button>
+              )}
+              {onOpenDependencies && (
+                <button onClick={() => executeAndClose(onOpenDependencies)} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white">
+                  Manage Dependencies...
+                </button>
+              )}
+              <div className="h-[1px] bg-[#393b40] my-1" />
               <button onClick={() => executeAndClose(() => onBuild('assembleDebug'))} className="w-full text-left px-3 py-1.5 hover:bg-[#3574f0] hover:text-white flex justify-between">
                 <span>Assemble Debug APK</span>
                 <span className="text-[10px] text-[#3ddc84]">Recommended</span>

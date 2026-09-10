@@ -101,7 +101,7 @@ export class AdbService {
     }
   }
 
-  static async getLogcat(serial: string, packageName?: string, lines: number = 100): Promise<{ success: boolean; output?: string; limitationReason?: string }> {
+  static async getLogcat(serial: string, packageName?: string, lines: number = 100): Promise<{ success: boolean; output?: string; limitationReason?: string; error?: string }> {
     try {
       const query = new URLSearchParams({
         serial,

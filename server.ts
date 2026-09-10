@@ -6,6 +6,8 @@ import { createServer as createViteServer } from 'vite';
 import { createAdbRouter } from './server/adbRoutes';
 import { createApkRouter } from './server/apkRoutes';
 import { createGitRouter } from './server/gitRoutes';
+import { createSdkRouter } from './server/sdkRoutes';
+import { createGradleRouter } from './server/gradleRoutes';
 
 const app = express();
 const PORT = 3000;
@@ -22,6 +24,8 @@ if (!fs.existsSync(WORKSPACE_DIR)) {
 app.use('/api/adb', createAdbRouter(WORKSPACE_DIR));
 app.use('/api/apk', createApkRouter(WORKSPACE_DIR));
 app.use('/api/git', createGitRouter(WORKSPACE_DIR));
+app.use('/api/sdk', createSdkRouter(WORKSPACE_DIR));
+app.use('/api/gradle', createGradleRouter(WORKSPACE_DIR));
 
 // Helper: Safe path resolution to prevent path traversal
 function resolveSafePath(projectName: string, relativePath: string): string {
