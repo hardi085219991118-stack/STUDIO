@@ -228,6 +228,12 @@ export function createGitRouter(workspaceDir: string): Router {
 
       const projectDir = getProjectDir(projectName);
 
+      // Auto-stage all if nothing currently staged
+      const stagedCheck = await runGit('git diff --cached --name-only', projectDir);
+      if (!stagedCheck.stdout.trim()) {
+        await runGit('git add -A', projectDir);
+      }
+
       // Secret Scanning on staged changes
       const diffCached = await runGit('git diff --cached', projectDir);
       const detectedSecrets = scanForSecrets(diffCached.stdout);
@@ -281,6 +287,35 @@ export function createGitRouter(workspaceDir: string): Router {
 
   // 7. Log: Commit History
   router.get('/log', async (req, res) => {
+    try {
+      const { projectName, maxCount = '30' } = req.query;
+      const projectDir = getProjectDir(projectName as string);
+
+      const logRes = await runGit(`git log -n ${maxCount} --pretty=format:"%h|%an|%ar|%s"`, projectDir);
+      if (logRes.exitCode !== 0) {
+        return res.json({ success: true, commits: [] });
+      }
+
+      const commits = logRes.stdout
+        .split('\n')
+        .filter(Boolean)
+        .map((line) => {
+          const parts = line.split('|');
+          return {
+            hash: parts[0],
+            author: parts[1] || 'Developer',
+            date: parts[2] || '',
+            message: parts.slice(3).join('|') || '',
+          };
+        });
+
+      res.json({ success: true, commits });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message, commits: [] });
+    }
+  });
+
+  router.get('/history', async (req, res) => {
     try {
       const { projectName, maxCount = '30' } = req.query;
       const projectDir = getProjectDir(projectName as string);

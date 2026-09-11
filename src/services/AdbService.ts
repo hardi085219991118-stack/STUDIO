@@ -74,13 +74,14 @@ export class AdbService {
   static async launchApp(
     serial: string,
     packageName: string,
-    activityName?: string
+    activityName?: string,
+    projectName?: string
   ): Promise<{ success: boolean; status: string; output?: string; error?: string }> {
     try {
       const res = await fetch('/api/adb/launch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ serial, packageName, activityName }),
+        body: JSON.stringify({ serial, packageName, activityName, projectName }),
       });
       return await res.json();
     } catch (err: any) {

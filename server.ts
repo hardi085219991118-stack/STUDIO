@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { exec } from 'child_process';
 import { createServer as createViteServer } from 'vite';
 import { createAdbRouter } from './server/adbRoutes';
@@ -35,7 +36,8 @@ function resolveSafePath(projectName: string, relativePath: string): string {
   const safeProjectName = path.basename(projectName || 'MyApplication');
   const projectPath = path.join(WORKSPACE_DIR, safeProjectName);
   const resolved = path.resolve(projectPath, relativePath);
-  if (!resolved.startsWith(projectPath)) {
+  const rel = path.relative(projectPath, resolved);
+  if (rel.startsWith('..') || path.isAbsolute(rel)) {
     throw new Error('Access denied: Path traversal outside project directory');
   }
   return resolved;
@@ -265,13 +267,14 @@ app.post('/api/fs/write', (req, res) => {
 });
 
 // 6. API: Read File from Disk
-app.get('/api/fs/read', (req, res) => {
+app.get(['/api/fs/read', '/api/file'], (req, res) => {
   try {
-    const { relativePath, projectName } = req.query;
+    const relativePath = (req.query.relativePath as string) || (req.query.filePath as string);
+    const projectName = req.query.projectName as string;
     if (!relativePath) {
-      return res.status(400).json({ success: false, error: 'relativePath is required' });
+      return res.status(400).json({ success: false, error: 'relativePath (or filePath) is required' });
     }
-    const fullPath = resolveSafePath(projectName as string, relativePath as string);
+    const fullPath = resolveSafePath(projectName, relativePath);
     if (!fs.existsSync(fullPath)) {
       return res.status(404).json({ success: false, error: 'File not found' });
     }
@@ -282,10 +285,65 @@ app.get('/api/fs/read', (req, res) => {
   }
 });
 
+// 6b. API: List Files in Project
+app.get('/api/fs/list', (req, res) => {
+  try {
+    const projectName = (req.query.projectName as string) || 'MyApplication';
+    const safeName = path.basename(projectName);
+    const projectPath = path.join(WORKSPACE_DIR, safeName);
+    if (!fs.existsSync(projectPath)) {
+      return res.status(404).json({ success: false, error: 'Project not found', files: [] });
+    }
+
+    const loadedFiles: { id: string; name: string; path: string; content: string; type: string }[] = [];
+
+    function scan(dir: string, relPrefix = '') {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.name === 'build' || entry.name === '.gradle' || entry.name === '.git' || entry.name === 'node_modules') {
+          continue;
+        }
+        const full = path.join(dir, entry.name);
+        const rel = relPrefix ? `${relPrefix}/${entry.name}` : entry.name;
+        if (entry.isDirectory()) {
+          scan(full, rel);
+        } else {
+          try {
+            const content = fs.readFileSync(full, 'utf-8');
+            let type = 'file';
+            if (entry.name.endsWith('.kt')) type = 'kotlin';
+            else if (entry.name.endsWith('.java')) type = 'java';
+            else if (entry.name.endsWith('.xml')) type = 'xml';
+            else if (entry.name.endsWith('.gradle') || entry.name.endsWith('.gradle.kts')) type = 'gradle';
+            else if (entry.name.endsWith('.json')) type = 'json';
+            else if (entry.name.endsWith('.properties')) type = 'properties';
+
+            loadedFiles.push({
+              id: 'file-' + rel.replace(/[^a-zA-Z0-9]/g, '_'),
+              name: entry.name,
+              path: rel,
+              content,
+              type,
+            });
+          } catch (e) {
+            // ignore binary files
+          }
+        }
+      }
+    }
+
+    scan(projectPath);
+    res.json({ success: true, projectName: safeName, files: loadedFiles });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message, files: [] });
+  }
+});
+
 // 7. API: Delete File or Directory
 app.post('/api/fs/delete', (req, res) => {
   try {
-    const { relativePath, projectName } = req.body;
+    const relativePath = req.body.relativePath || req.body.filePath;
+    const projectName = req.body.projectName;
     if (!relativePath) {
       return res.status(400).json({ success: false, error: 'relativePath is required' });
     }
@@ -308,7 +366,9 @@ app.post('/api/fs/delete', (req, res) => {
 // 8. API: Rename File or Directory
 app.post('/api/fs/rename', (req, res) => {
   try {
-    const { oldRelativePath, newRelativePath, projectName } = req.body;
+    const oldRelativePath = req.body.oldRelativePath || req.body.oldPath;
+    const newRelativePath = req.body.newRelativePath || req.body.newPath;
+    const projectName = req.body.projectName;
     if (!oldRelativePath || !newRelativePath) {
       return res.status(400).json({ success: false, error: 'oldRelativePath and newRelativePath are required' });
     }
@@ -474,19 +534,60 @@ app.post('/api/build/gradle', async (req, res) => {
   const gradleCmd = hasGradlew ? `./gradlew ${task}` : `gradle ${task}`;
   const startTime = Date.now();
 
+  // 1. Snapshot all pre-existing APK artifacts prior to build
+  const searchDirs = [
+    path.join(projectDir, 'app', 'build', 'outputs', 'apk', 'debug'),
+    path.join(projectDir, 'app', 'build', 'outputs', 'apk', 'release'),
+    path.join(projectDir, 'build', 'outputs', 'apk'),
+    path.join(WORKSPACE_DIR, 'builds'),
+  ];
+
+  const preBuildSnapshots = new Map<string, { mtimeMs: number; size: number; sha256: string }>();
+
+  function computeFileSha256(filePath: string): string {
+    try {
+      const buffer = fs.readFileSync(filePath);
+      return crypto.createHash('sha256').update(buffer).digest('hex');
+    } catch {
+      return '';
+    }
+  }
+
+  for (const sDir of searchDirs) {
+    if (fs.existsSync(sDir)) {
+      try {
+        const files = fs.readdirSync(sDir);
+        for (const f of files) {
+          if (f.endsWith('.apk')) {
+            const fullP = path.join(sDir, f);
+            const stat = fs.statSync(fullP);
+            preBuildSnapshots.set(fullP, {
+              mtimeMs: stat.mtimeMs,
+              size: stat.size,
+              sha256: computeFileSha256(fullP),
+            });
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }
+
   exec(gradleCmd, { cwd: projectDir, timeout: 120000 }, (error, stdout, stderr) => {
     const durationMs = Date.now() - startTime;
     const isCommandSuccess = !error;
 
-    // Scan for actual APK artifact on disk
-    const searchDirs = [
-      path.join(projectDir, 'app', 'build', 'outputs', 'apk', 'debug'),
-      path.join(projectDir, 'app', 'build', 'outputs', 'apk', 'release'),
-      path.join(projectDir, 'build', 'outputs', 'apk'),
-      path.join(WORKSPACE_DIR, 'builds'),
-    ];
-
-    let foundApk: { path: string; name: string; sizeBytes: number; sizeFormatted: string } | null = null;
+    // Scan for newly generated or updated APK artifact on disk
+    let foundApk: {
+      path: string;
+      name: string;
+      sizeBytes: number;
+      sizeFormatted: string;
+      sha256: string;
+      mtime: string;
+      isFreshlyGenerated: boolean;
+    } | null = null;
 
     for (const sDir of searchDirs) {
       if (fs.existsSync(sDir)) {
@@ -497,21 +598,38 @@ app.post('/api/build/gradle', async (req, res) => {
               const fullP = path.join(sDir, f);
               const stat = fs.statSync(fullP);
               if (stat.size > 0) {
-                const k = 1024;
-                const sizes = ['B', 'KB', 'MB', 'GB'];
-                const i = Math.floor(Math.log(stat.size) / Math.log(k));
-                const formatted = parseFloat((stat.size / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-                foundApk = {
-                  path: fullP,
-                  name: f,
-                  sizeBytes: stat.size,
-                  sizeFormatted: formatted,
-                };
-                break;
+                const preSnap = preBuildSnapshots.get(fullP);
+                const currentSha256 = computeFileSha256(fullP);
+
+                // Verified as genuinely from this build if:
+                // 1. Did not exist prior to this build, OR
+                // 2. Modified during or after startTime, OR
+                // 3. Sha256 differs from pre-build snapshot
+                const isFresh = !preSnap ||
+                  stat.mtimeMs >= startTime - 1000 ||
+                  preSnap.sha256 !== currentSha256;
+
+                if (isFresh) {
+                  const k = 1024;
+                  const sizes = ['B', 'KB', 'MB', 'GB'];
+                  const i = Math.floor(Math.log(stat.size) / Math.log(k));
+                  const formatted = parseFloat((stat.size / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+
+                  foundApk = {
+                    path: fullP,
+                    name: f,
+                    sizeBytes: stat.size,
+                    sizeFormatted: formatted,
+                    sha256: currentSha256,
+                    mtime: new Date(stat.mtimeMs).toISOString(),
+                    isFreshlyGenerated: true,
+                  };
+                  break;
+                }
               }
             }
           }
-        } catch (e) {
+        } catch {
           // ignore
         }
       }
@@ -519,9 +637,9 @@ app.post('/api/build/gradle', async (req, res) => {
     }
 
     // Strict Build Verification:
-    // If task was assembleDebug/assembleRelease and no APK was generated, build is not considered successful!
+    // If task was assembleDebug/assembleRelease and no freshly generated APK was found, build is failed!
     const isAssemble = task.toLowerCase().includes('assemble');
-    const finalSuccess = isCommandSuccess && (!isAssemble || foundApk !== null);
+    const finalSuccess = isCommandSuccess && (!isAssemble || Boolean(foundApk));
 
     let status = 'BUILD_SUCCESSFUL';
     if (!isCommandSuccess) {
@@ -542,7 +660,10 @@ app.post('/api/build/gradle', async (req, res) => {
       apkName: foundApk?.name,
       apkSizeBytes: foundApk?.sizeBytes,
       apkSizeFormatted: foundApk?.sizeFormatted,
-      error: !finalSuccess ? (error ? error.message : 'Task finished but no APK artifact was found.') : undefined,
+      apkSha256: foundApk?.sha256,
+      apkMtime: foundApk?.mtime,
+      isFreshlyGenerated: foundApk?.isFreshlyGenerated ?? false,
+      error: !finalSuccess ? (error ? error.message : 'Build selesai tetapi tidak ada artifact APK baru yang dihasilkan dari build ini.') : undefined,
       logs: [
         {
           id: 'log-1',
@@ -556,7 +677,7 @@ app.post('/api/build/gradle', async (req, res) => {
           timestamp: new Date().toLocaleTimeString(),
           phase: 'PACKAGING',
           level: 'success' as const,
-          message: `Verified APK Artifact: ${foundApk.name} (${foundApk.sizeFormatted}) at ${foundApk.path}`,
+          message: `Terverifikasi APK Nyata: ${foundApk.name} (${foundApk.sizeFormatted}) [SHA256: ${foundApk.sha256.slice(0, 12)}...]`,
         }] : []),
       ],
     });

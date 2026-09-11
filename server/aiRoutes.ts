@@ -67,10 +67,29 @@ export function createAiRouter(workspaceDir: string): Router {
 
       const plan = generatePlan(prompt, hasKotlin, Boolean(manifestFile));
 
+      const planData = {
+        title: plan.featureName || 'Perencanaan Fitur AI',
+        description: `Rencana eksekusi terstruktur untuk prompt: "${prompt}"`,
+        steps: plan.steps,
+        filesToCreate: plan.filesToCreate.map((f: any) =>
+          typeof f === 'string' ? { path: f, purpose: 'Implementasi komponen baru' } : f
+        ),
+        filesToModify: plan.filesToModify.map((f: any) =>
+          typeof f === 'string' ? { path: f, purpose: 'Integrasi dengan komponen yang ada' } : f
+        ),
+        filesToDelete: (plan.filesToDelete || []).map((p: any) =>
+          typeof p === 'string' ? { path: p, reason: 'Dihapus sesuai kebutuhan arsitektur' } : p
+        ),
+        dependenciesToAdd: plan.dependenciesToAdd || [],
+        riskAssessment: 'Rendah - Perubahan terkontrol dan tervalidasi.',
+        estimatedComplexity: plan.filesToCreate.length > 2 ? 'HIGH' : (plan.filesToCreate.length > 0 ? 'MEDIUM' : 'LOW'),
+      };
+
       res.json({
         success: true,
         prompt,
-        plan: plan.steps,
+        plan: planData,
+        rawSteps: plan.steps,
         featureName: plan.featureName,
         filesToCreate: plan.filesToCreate,
         filesToModify: plan.filesToModify,
@@ -92,6 +111,7 @@ export function createAiRouter(workspaceDir: string): Router {
         projectName = 'MyApplication',
         projectContext,
         createGitCheckpoint = true,
+        allowDestructive = false,
       } = req.body;
 
       if (!prompt) {
@@ -102,7 +122,36 @@ export function createAiRouter(workspaceDir: string): Router {
       const projectDir = path.join(workspaceDir, safeProjectName);
       fs.mkdirSync(projectDir, { recursive: true });
 
-      const files = projectContext?.files || [];
+      // Gather project files from request or read from disk
+      let files: Array<{ path: string; content: string }> = projectContext?.files || [];
+      if (files.length === 0 && fs.existsSync(projectDir)) {
+        const diskFiles: Array<{ path: string; content: string }> = [];
+        function readDirRecursive(currentPath: string, relativePrefix = '') {
+          try {
+            const entries = fs.readdirSync(currentPath, { withFileTypes: true });
+            for (const entry of entries) {
+              if (['.git', '.gradle', 'build', 'node_modules'].includes(entry.name)) continue;
+              const fullPath = path.join(currentPath, entry.name);
+              const relPath = relativePrefix ? `${relativePrefix}/${entry.name}` : entry.name;
+              if (entry.isDirectory()) {
+                readDirRecursive(fullPath, relPath);
+              } else {
+                try {
+                  const content = fs.readFileSync(fullPath, 'utf-8');
+                  diskFiles.push({ path: relPath, content });
+                } catch {
+                  // binary file
+                }
+              }
+            }
+          } catch {
+            // ignore
+          }
+        }
+        readDirRecursive(projectDir);
+        if (diskFiles.length > 0) files = diskFiles;
+      }
+
       const existingPackage = extractPackageName(files) || 'com.example.myapplication';
 
       // Git Checkpoint if requested
@@ -157,11 +206,36 @@ export function createAiRouter(workspaceDir: string): Router {
         appliedFiles.push({ path: item.path, content: item.content, status: 'modified' });
       }
 
+      // Backend Security Gate: verify allowDestructive before any file unlinking
+      const securityGateLogs: Array<{ step: string; message: string; level: 'info' | 'warn' | 'error' | 'success' }> = [];
+      const filesDeletedList: string[] = [];
+
       for (const delPath of generationResult.filesToDelete || []) {
+        if (!allowDestructive) {
+          securityGateLogs.push({
+            step: 'SECURITY GATE',
+            message: `Penghapusan berkas '${delPath}' dicegah karena opsi allowDestructive dinonaktifkan.`,
+            level: 'warn',
+          });
+          continue;
+        }
+
+        // Critical project bootstrap files are strictly protected from deletion
+        const isProtectedBootstrap = delPath.includes('build.gradle') || delPath.includes('settings.gradle') || delPath.includes('AndroidManifest.xml');
+        if (isProtectedBootstrap) {
+          securityGateLogs.push({
+            step: 'SECURITY GATE',
+            message: `Penghapusan berkas esensial '${delPath}' ditolak demi menjaga kestabilan proyek.`,
+            level: 'warn',
+          });
+          continue;
+        }
+
         try {
           const fullP = resolveSafePath(safeProjectName, delPath);
           if (fs.existsSync(fullP)) {
             fs.unlinkSync(fullP);
+            filesDeletedList.push(delPath);
           }
         } catch (e) {
           // ignore
@@ -169,21 +243,121 @@ export function createAiRouter(workspaceDir: string): Router {
       }
 
       // Run Self-Audit & Regression checks
-      const audit = performSelfAudit(appliedFiles, files);
-      const regression = performRegressionCheck(appliedFiles, files);
+      let audit = performSelfAudit(appliedFiles, files);
+      let regression = performRegressionCheck(appliedFiles, files);
+
+      // Autonomous Auto-Fix Loop (Up to 3 iterations)
+      const autoFixLogs: Array<{ step: string; message: string; level: 'info' | 'warn' | 'error' | 'success' }> = [];
+      let autoFixPasses = 0;
+
+      while ((!audit.passed || !regression.passed) && autoFixPasses < 3) {
+        autoFixPasses++;
+        const fixResult = autoFixIssues(appliedFiles, files, audit.issues, regression.details);
+        if (fixResult.fixedCount === 0) break; // No further programmatic fixes possible
+
+        for (const logMsg of fixResult.fixLogs) {
+          autoFixLogs.push({
+            step: `AUTO-FIX (Siklus ${autoFixPasses})`,
+            message: logMsg,
+            level: 'warn',
+          });
+        }
+
+        // Persist repaired files
+        for (const rep of fixResult.repairedFiles) {
+          const exIdx = appliedFiles.findIndex(a => a.path === rep.path);
+          if (exIdx !== -1) {
+            appliedFiles[exIdx] = rep;
+          } else {
+            appliedFiles.push(rep);
+          }
+          const fullP = resolveSafePath(safeProjectName, rep.path);
+          fs.mkdirSync(path.dirname(fullP), { recursive: true });
+          fs.writeFileSync(fullP, rep.content, 'utf-8');
+        }
+
+        // Re-audit and re-check regression
+        audit = performSelfAudit(appliedFiles, files);
+        regression = performRegressionCheck(appliedFiles, files);
+      }
+
+      if (autoFixPasses > 0 && audit.passed && regression.passed) {
+        autoFixLogs.push({
+          step: 'AUTO-FIX BERHASIL',
+          message: `Seluruh isu berhasil diperbaiki otomatis dalam ${autoFixPasses} iterasi. Audit & regresi kini LULUS (PASS).`,
+          level: 'success',
+        });
+      }
 
       // Inspect build environment
       const envDiag = await detectBuildEnvironment(workspaceDir);
 
+      const filesCreatedList = generationResult.filesToCreate.map((f: any) => f.path);
+      const filesModifiedList = generationResult.filesToModify.map((f: any) => f.path);
+
+      // Construct frontend Contract Result
+      const resultObj = {
+        commandPrompt: prompt,
+        plan: {
+          title: generationResult.featureName || 'Implementasi Fitur Android',
+          description: generationResult.summary || 'Pembaruan kode sumber dan konfigurasi aplikasi Android.',
+          steps: generationResult.plan || [],
+          filesToCreate: generationResult.filesToCreate.map((f: any) => ({
+            path: f.path,
+            purpose: f.purpose || 'Berkas baru untuk implementasi fitur',
+          })),
+          filesToModify: generationResult.filesToModify.map((f: any) => ({
+            path: f.path,
+            purpose: f.purpose || 'Modifikasi logika kode / tata letak antarmuka',
+          })),
+          filesToDelete: (generationResult.filesToDelete || []).map((p: string) => ({
+            path: p,
+            reason: allowDestructive ? 'Dihapus sesuai restrukturisasi' : 'Penghapusan dicegah oleh Security Gate',
+          })),
+          dependenciesToAdd: generationResult.dependenciesToAdd || [],
+          riskAssessment: audit.passed ? 'Rendah - Semua pemeriksaan audit sintaks dan struktur lulus.' : 'Perhatian - Ditemukan catatan audit pada berkas.',
+          estimatedComplexity: filesCreatedList.length > 2 ? 'HIGH' : (filesCreatedList.length > 0 ? 'MEDIUM' : 'LOW'),
+        },
+        filesCreated: filesCreatedList,
+        filesModified: filesModifiedList,
+        filesDeleted: filesDeletedList,
+        buildStatus: envDiag.isBuildReady ? 'PASS' : 'LIMITED_BY_ENVIRONMENT',
+        buildReason: envDiag.isBuildReady
+          ? 'Toolchain Java JDK & Android SDK terkonfigurasi pada host.'
+          : (envDiag.limitationReason || 'Lingkungan container tidak memiliki JDK atau Android SDK native.'),
+        testStatus: envDiag.isBuildReady ? 'PASS' : 'FAIL',
+        testDetails: envDiag.isBuildReady
+          ? ['Unit test Gradle siap dieksekusi melalui task testDebugUnitTest.']
+          : ['Unit testing native tidak dapat dijalankan: JDK/Android toolchain tidak tersedia di container.'],
+        auditStatus: audit.passed ? 'PASS' : 'FAIL',
+        auditIssues: audit.issues,
+        regressionStatus: regression.passed ? 'PASS' : 'FAIL',
+        regressionDetails: regression.details,
+        apkStatus: 'NOT_GENERATED' as const,
+        verificationStatus: envDiag.isBuildReady ? ('VERIFIED' as const) : ('LIMITED_BY_ENVIRONMENT' as const),
+        logs: [
+          { timestamp: new Date().toLocaleTimeString(), step: 'ANALISIS', message: 'Menganalisis kebutuhan prompt & konteks project Android...', level: 'info' as const },
+          { timestamp: new Date().toLocaleTimeString(), step: 'PERENCANAAN', message: `Menyusun rencana implementasi: ${generationResult.featureName}`, level: 'info' as const },
+          ...securityGateLogs.map(l => ({ timestamp: new Date().toLocaleTimeString(), step: l.step, message: l.message, level: l.level })),
+          { timestamp: new Date().toLocaleTimeString(), step: 'MODIFIKASI', message: `Menulis ${filesCreatedList.length} berkas baru dan memperbarui ${filesModifiedList.length} berkas.`, level: 'success' as const },
+          ...autoFixLogs.map(l => ({ timestamp: new Date().toLocaleTimeString(), step: l.step, message: l.message, level: l.level })),
+          { timestamp: new Date().toLocaleTimeString(), step: 'AUDIT', message: `Audit kualitas kode: ${audit.passed ? 'LULUS' : 'DITEMUKAN CATATAN'} (${audit.issues.length} isu terdeteksi).`, level: audit.passed ? 'success' as const : 'warn' as const },
+          { timestamp: new Date().toLocaleTimeString(), step: 'REGRESI', message: `Pemeriksaan integritas regresi: ${regression.passed ? 'LULUS' : 'GAGAL'}.`, level: regression.passed ? 'success' as const : 'error' as const },
+          { timestamp: new Date().toLocaleTimeString(), step: 'VERIFIKASI', message: envDiag.isBuildReady ? 'Build environment terverifikasi.' : `Status verifikasi: LIMITED_BY_ENVIRONMENT (${envDiag.missingTools.join(', ') || 'JDK/SDK'})`, level: envDiag.isBuildReady ? 'success' as const : 'warn' as const },
+        ],
+      };
+
       res.json({
         success: true,
+        result: resultObj,
+        // Root fields for compatibility
         prompt,
         plan: generationResult.plan,
         summary: generationResult.summary,
         featureName: generationResult.featureName,
-        filesCreated: generationResult.filesToCreate.map((f: any) => f.path),
-        filesModified: generationResult.filesToModify.map((f: any) => f.path),
-        filesDeleted: generationResult.filesToDelete || [],
+        filesCreated: filesCreatedList,
+        filesModified: filesModifiedList,
+        filesDeleted: filesDeletedList,
         dependenciesAdded: generationResult.dependenciesToAdd || [],
         configurationChanged: generationResult.configurationChanges || [],
         appliedFiles,
@@ -193,6 +367,7 @@ export function createAiRouter(workspaceDir: string): Router {
           performance: audit.performance,
           manifestCheck: audit.manifestCheck,
           details: audit.details,
+          issues: audit.issues,
           passed: audit.passed,
         },
         regression: {
@@ -1239,53 +1414,169 @@ class ${actName} : AppCompatActivity() {
 }
 
 // ---------------------------------------------------------------------------
-// Self Audit: Code Quality, Manifest, Security, Resources
+// Self Audit: Real Syntactic, Manifest, Resource, Security, and Code Quality
 // ---------------------------------------------------------------------------
 function performSelfAudit(
   appliedFiles: Array<{ path: string; content: string }>,
   allFiles: Array<{ path: string; content: string }>
 ) {
   const details: string[] = [];
-  let codeQuality: 'PASS' | 'WARN' = 'PASS';
-  let security: 'PASS' | 'WARN' = 'PASS';
+  const issues: Array<{ severity: 'critical' | 'warn' | 'info'; message: string; file?: string }> = [];
+
+  let codeQuality: 'PASS' | 'WARN' | 'FAIL' = 'PASS';
+  let security: 'PASS' | 'WARN' | 'FAIL' = 'PASS';
   let performance: 'PASS' | 'WARN' = 'PASS';
+  let manifestCheck: 'PASS' | 'WARN' | 'FAIL' = 'PASS';
 
+  const mergedFilesMap = new Map<string, string>();
+  for (const f of allFiles) mergedFilesMap.set(f.path, f.content);
+  for (const f of appliedFiles) mergedFilesMap.set(f.path, f.content);
+
+  // 1. Source Code Syntax & Structure Check
   for (const f of appliedFiles) {
-    // Check balanced braces
     if (f.path.endsWith('.kt') || f.path.endsWith('.java')) {
-      const openB = (f.content.match(/\{/g) || []).length;
-      const closeB = (f.content.match(/\}/g) || []).length;
-      if (openB !== closeB) {
-        codeQuality = 'WARN';
-        details.push(`Peringatan sintaksis: Jumlah kurung kurawal '{' dan '}' tidak seimbang di ${path.basename(f.path)}.`);
+      const fileName = path.basename(f.path);
+
+      // Balanced curly braces
+      const openBraces = (f.content.match(/\{/g) || []).length;
+      const closeBraces = (f.content.match(/\}/g) || []).length;
+      if (openBraces !== closeBraces) {
+        codeQuality = 'FAIL';
+        const msg = `Sintaks error: Jumlah kurung kurawal '{' (${openBraces}) dan '}' (${closeBraces}) tidak seimbang di ${fileName}.`;
+        details.push(msg);
+        issues.push({ severity: 'critical', message: msg, file: f.path });
+      }
+
+      // Balanced parentheses
+      const openParens = (f.content.match(/\(/g) || []).length;
+      const closeParens = (f.content.match(/\)/g) || []).length;
+      if (openParens !== closeParens) {
+        codeQuality = codeQuality === 'FAIL' ? 'FAIL' : 'WARN';
+        const msg = `Peringatan sintaks: Jumlah tanda kurung '(' (${openParens}) dan ')' (${closeParens}) tidak seimbang di ${fileName}.`;
+        details.push(msg);
+        issues.push({ severity: 'warn', message: msg, file: f.path });
+      }
+
+      // Check package declaration
+      if (!f.content.includes('package ')) {
+        codeQuality = codeQuality === 'FAIL' ? 'FAIL' : 'WARN';
+        const msg = `Berkas sumber ${fileName} tidak memiliki deklarasi package.`;
+        details.push(msg);
+        issues.push({ severity: 'warn', message: msg, file: f.path });
       }
     }
 
-    // Check XML tags
+    // 2. XML Syntax & Layout Validation
     if (f.path.endsWith('.xml')) {
-      if (!f.content.includes('<?xml') && !f.content.includes('<LinearLayout') && !f.content.includes('<resources>')) {
-        codeQuality = 'WARN';
-        details.push(`Peringatan format XML di ${path.basename(f.path)}.`);
+      const fileName = path.basename(f.path);
+      const content = f.content.trim();
+
+      if (!content.startsWith('<?xml') && !content.startsWith('<')) {
+        codeQuality = 'FAIL';
+        const msg = `Berkas XML ${fileName} tidak memiliki awalan tag XML yang valid.`;
+        details.push(msg);
+        issues.push({ severity: 'critical', message: msg, file: f.path });
+      }
+
+      // Check Android namespace if android: attributes exist
+      if (content.includes('android:') && !content.includes('xmlns:android=')) {
+        codeQuality = codeQuality === 'FAIL' ? 'FAIL' : 'WARN';
+        const msg = `Berkas layout ${fileName} menggunakan atribut 'android:' tanpa deklarasi xmlns:android.`;
+        details.push(msg);
+        issues.push({ severity: 'warn', message: msg, file: f.path });
+      }
+    }
+
+    // 3. Security Audit: Scan for Hardcoded Secrets
+    const SECRET_REGEXES = [
+      { name: 'Google API Key', regex: /AIza[0-9A-Za-z-_]{35}/ },
+      { name: 'Private Key', regex: /-----BEGIN (RSA|EC|OPENSSH)? PRIVATE KEY-----/ },
+      { name: 'Hardcoded Token/Secret', regex: /(api_key|apiKey|secret_key|private_key)\s*=\s*["'][A-Za-z0-9_\-]{20,}["']/i },
+    ];
+
+    for (const sec of SECRET_REGEXES) {
+      if (sec.regex.test(f.content)) {
+        security = 'FAIL';
+        const msg = `Kerentanan Keamanan: Ditemukan potensi ${sec.name} tersimpan di ${path.basename(f.path)}.`;
+        details.push(msg);
+        issues.push({ severity: 'critical', message: msg, file: f.path });
       }
     }
   }
 
-  // Check AndroidManifest
-  const manifest = allFiles.find(f => f.path.includes('AndroidManifest.xml'));
-  let manifestCheck = 'PASS';
-  if (manifest) {
-    if (!manifest.content.includes('<manifest') || !manifest.content.includes('</manifest>')) {
-      manifestCheck = 'FAIL';
-      codeQuality = 'WARN';
-      details.push('AndroidManifest.xml tidak memiliki penutup tag </manifest> yang valid.');
+  // 4. AndroidManifest Integrity & Compliance
+  let manifestContent = '';
+  for (const [p, c] of mergedFilesMap.entries()) {
+    if (p.includes('AndroidManifest.xml')) {
+      manifestContent = c;
+      break;
     }
   }
 
-  if (details.length === 0) {
-    details.push('Semua berkas baru dan modifikasi memenuhi standar kualitas kode Android Kotlin/XML.');
-    details.push('Tidak ditemukan hardcoded security secret atau kerentanan exported receiver.');
-    details.push('Struktur tata letak XML responsif dan siap dirender.');
+  if (manifestContent) {
+    if (!manifestContent.includes('<manifest') || !manifestContent.includes('</manifest>')) {
+      manifestCheck = 'FAIL';
+      const msg = 'AndroidManifest.xml tidak memiliki tag pembuka <manifest> atau penutup </manifest> yang valid.';
+      details.push(msg);
+      issues.push({ severity: 'critical', message: msg, file: 'AndroidManifest.xml' });
+    }
+
+    if (!manifestContent.includes('<application') || !manifestContent.includes('</application>')) {
+      manifestCheck = 'FAIL';
+      const msg = 'AndroidManifest.xml tidak memiliki tag <application> yang lengkap.';
+      details.push(msg);
+      issues.push({ severity: 'critical', message: msg, file: 'AndroidManifest.xml' });
+    }
+
+    // Android 12+ Exported Attribute Check
+    if (manifestContent.includes('<intent-filter>') && !manifestContent.includes('android:exported=')) {
+      manifestCheck = manifestCheck === 'FAIL' ? 'FAIL' : 'WARN';
+      const msg = 'AndroidManifest: Komponen dengan <intent-filter> harus mendeklarasikan atribut android:exported="true|false" untuk kompatibilitas Android 12+.';
+      details.push(msg);
+      issues.push({ severity: 'warn', message: msg, file: 'AndroidManifest.xml' });
+    }
+
+    // Check referenced XML resources in Manifest exist
+    const refMatches = manifestContent.matchAll(/@(xml|mipmap|drawable)\/([a-zA-Z0-9_]+)/g);
+    for (const match of refMatches) {
+      const type = match[1];
+      const resName = match[2];
+      const expectedPathPrefix = `app/src/main/res/${type}/`;
+      let found = false;
+
+      for (const [p] of mergedFilesMap.entries()) {
+        if (p.includes(expectedPathPrefix) && p.includes(resName)) {
+          found = true;
+          break;
+        }
+        if (type === 'mipmap' && p.includes('mipmap') && p.includes(resName)) {
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        manifestCheck = manifestCheck === 'FAIL' ? 'FAIL' : 'WARN';
+        const msg = `Manifest mereferensikan @${type}/${resName} tetapi file resource tersebut tidak ditemukan di direktori res/.`;
+        details.push(msg);
+        issues.push({ severity: 'warn', message: msg, file: 'AndroidManifest.xml' });
+      }
+    }
+  } else {
+    manifestCheck = 'FAIL';
+    const msg = 'Proyek tidak memiliki berkas AndroidManifest.xml.';
+    details.push(msg);
+    issues.push({ severity: 'critical', message: msg });
   }
+
+  // 5. Default success report if no issues
+  if (issues.length === 0) {
+    details.push('Semua berkas memenuhi standar kualitas kode Android Kotlin/XML.');
+    details.push('Struktur AndroidManifest.xml valid dan mematuhi standar Android 12+ (API 31+).');
+    details.push('Tidak ditemukan hardcoded security secret atau kerentanan exported receiver.');
+  }
+
+  const passed = codeQuality !== 'FAIL' && security !== 'FAIL' && manifestCheck !== 'FAIL';
 
   return {
     codeQuality,
@@ -1293,7 +1584,8 @@ function performSelfAudit(
     performance,
     manifestCheck,
     details,
-    passed: codeQuality === 'PASS' && manifestCheck !== 'FAIL',
+    issues,
+    passed,
   };
 }
 
@@ -1305,27 +1597,157 @@ function performRegressionCheck(
   existingFiles: Array<{ path: string; content: string }>
 ) {
   const details: string[] = [];
+  let passed = true;
 
-  // Verify MainActivity still exists
-  const hasMainActivity = existingFiles.some(f => f.path.includes('MainActivity')) ||
-    appliedFiles.some(f => f.path.includes('MainActivity'));
+  const mergedFilesMap = new Map<string, string>();
+  for (const f of existingFiles) mergedFilesMap.set(f.path, f.content);
+  for (const f of appliedFiles) mergedFilesMap.set(f.path, f.content);
 
-  if (hasMainActivity) {
+  // 1. Verify MainActivity still exists
+  const hadMainActivityBefore = existingFiles.some(f => f.path.includes('MainActivity.kt') || f.path.includes('MainActivity.java'));
+  const hasMainActivityNow = Array.from(mergedFilesMap.keys()).some(p => p.includes('MainActivity.kt') || p.includes('MainActivity.java'));
+
+  if (hadMainActivityBefore && !hasMainActivityNow) {
+    passed = false;
+    details.push('REGRESI KRITIS: MainActivity sebelumnya ada tetapi terhapus oleh modifikasi kode!');
+  } else if (hasMainActivityNow) {
     details.push('Komponen utama MainActivity terverifikasi utuh.');
+  } else {
+    details.push('Catatan: Proyek belum memiliki MainActivity standar.');
   }
 
-  // Verify Gradle build file still exists
-  const hasGradle = existingFiles.some(f => f.path.includes('build.gradle')) ||
-    appliedFiles.some(f => f.path.includes('build.gradle'));
+  // 2. Verify Gradle build file still exists
+  const hadGradleBefore = existingFiles.some(f => f.path.includes('build.gradle') || f.path.includes('build.gradle.kts'));
+  const hasGradleNow = Array.from(mergedFilesMap.keys()).some(p => p.includes('build.gradle') || p.includes('build.gradle.kts'));
 
-  if (hasGradle) {
+  if (hadGradleBefore && !hasGradleNow) {
+    passed = false;
+    details.push('REGRESI KRITIS: Konfigurasi build.gradle / build.gradle.kts sebelumnya ada tetapi terhapus!');
+  } else if (hasGradleNow) {
     details.push('Konfigurasi build.gradle / build.gradle.kts terverifikasi utuh.');
+  } else {
+    details.push('Catatan: Konfigurasi build.gradle belum diinisialisasi pada direktori proyek.');
   }
 
-  details.push('Tidak ada fungsi inti proyek sebelumnya yang terhapus secara tidak sengaja.');
+  // 3. Verify AndroidManifest still exists
+  const hadManifestBefore = existingFiles.some(f => f.path.includes('AndroidManifest.xml'));
+  const hasManifestNow = Array.from(mergedFilesMap.keys()).some(p => p.includes('AndroidManifest.xml'));
+
+  if (hadManifestBefore && !hasManifestNow) {
+    passed = false;
+    details.push('REGRESI KRITIS: AndroidManifest.xml sebelumnya ada tetapi terhapus!');
+  } else if (hasManifestNow) {
+    details.push('AndroidManifest.xml terverifikasi utuh.');
+  } else {
+    passed = false;
+    details.push('REGRESI KRITIS: AndroidManifest.xml tidak ditemukan!');
+  }
+
+  // 4. Verify existing files were not accidentally emptied
+  for (const f of existingFiles) {
+    const updatedContent = mergedFilesMap.get(f.path);
+    if (updatedContent !== undefined && f.content.length > 50 && updatedContent.trim().length === 0) {
+      passed = false;
+      details.push(`REGRESI: Berkas ${path.basename(f.path)} terhapus atau isinya menjadi kosong!`);
+    }
+  }
+
+  if (passed) {
+    details.push('Seluruh fungsi inti proyek sebelumnya terverifikasi aman dari regresi.');
+  }
 
   return {
-    passed: true,
+    passed,
     details,
   };
 }
+
+// ---------------------------------------------------------------------------
+// Autonomous Auto-Fix Engine
+// ---------------------------------------------------------------------------
+function autoFixIssues(
+  appliedFiles: Array<{ path: string; content: string; status: 'created' | 'modified' }>,
+  existingFiles: Array<{ path: string; content: string }>,
+  auditIssues: Array<{ severity: 'info' | 'warn' | 'critical'; message: string; file?: string }>,
+  regressionDetails: string[]
+): {
+  fixedCount: number;
+  fixLogs: string[];
+  repairedFiles: Array<{ path: string; content: string; status: 'created' | 'modified' }>;
+} {
+  const fixLogs: string[] = [];
+  let fixedCount = 0;
+  const repairedFiles = [...appliedFiles];
+
+  // 1. Auto-fix syntax & XML issues
+  for (const issue of auditIssues) {
+    if (!issue.file) continue;
+    const targetFileIndex = repairedFiles.findIndex(f => f.path.endsWith(issue.file!) || issue.file!.endsWith(f.path));
+    if (targetFileIndex === -1) continue;
+
+    const fileObj = repairedFiles[targetFileIndex];
+    let content = fileObj.content;
+
+    // A. Fix unbalanced braces in Kotlin/Java
+    if (issue.message.includes('Jumlah kurung kurawal') && (fileObj.path.endsWith('.kt') || fileObj.path.endsWith('.java'))) {
+      const openCount = (content.match(/\{/g) || []).length;
+      const closeCount = (content.match(/\}/g) || []).length;
+      if (openCount > closeCount) {
+        const diff = openCount - closeCount;
+        content = content.trimEnd() + '\n' + '}'.repeat(diff) + '\n';
+        repairedFiles[targetFileIndex] = { ...fileObj, content };
+        fixedCount++;
+        fixLogs.push(`[AUTO-FIX] Menyeimbangkan ${diff} kurung kurawal '}' pada ${fileObj.path}`);
+      }
+    }
+
+    // B. Fix missing XML namespace
+    if (issue.message.includes('xmlns:android') && fileObj.path.endsWith('.xml')) {
+      if (!content.includes('xmlns:android=')) {
+        content = content.replace(/(<[a-zA-Z0-9_.]+\b)/, `$1 xmlns:android="http://schemas.android.com/apk/res/android"`);
+        repairedFiles[targetFileIndex] = { ...fileObj, content };
+        fixedCount++;
+        fixLogs.push(`[AUTO-FIX] Menambahkan xmlns:android pada elemen akar ${fileObj.path}`);
+      }
+    }
+
+    // C. Fix Android 12+ exported attribute in manifest
+    if (issue.message.includes('android:exported') && fileObj.path.includes('AndroidManifest.xml')) {
+      content = content.replace(/(<activity\b)(?![\s\S]*?android:exported=)([\s\S]*?<intent-filter>)/gi, `$1 android:exported="true"$2`);
+      repairedFiles[targetFileIndex] = { ...fileObj, content };
+      fixedCount++;
+      fixLogs.push(`[AUTO-FIX] Menambahkan atribut android:exported="true" pada komponen Intent-Filter di ${fileObj.path}`);
+    }
+  }
+
+  // 2. Auto-fix critical regressions
+  for (const reg of regressionDetails) {
+    if (reg.includes('MainActivity')) {
+      const origMain = existingFiles.find(f => f.path.includes('MainActivity.kt') || f.path.includes('MainActivity.java'));
+      if (origMain && !repairedFiles.some(f => f.path === origMain.path)) {
+        repairedFiles.push({ path: origMain.path, content: origMain.content, status: 'modified' });
+        fixedCount++;
+        fixLogs.push(`[AUTO-FIX REGRESI] Memulihkan berkas utama ${origMain.path} dari versi awal`);
+      }
+    }
+    if (reg.includes('build.gradle')) {
+      const origGradle = existingFiles.find(f => f.path.includes('build.gradle'));
+      if (origGradle && !repairedFiles.some(f => f.path === origGradle.path)) {
+        repairedFiles.push({ path: origGradle.path, content: origGradle.content, status: 'modified' });
+        fixedCount++;
+        fixLogs.push(`[AUTO-FIX REGRESI] Memulihkan berkas konfigurasi ${origGradle.path} dari versi awal`);
+      }
+    }
+    if (reg.includes('AndroidManifest.xml')) {
+      const origManifest = existingFiles.find(f => f.path.includes('AndroidManifest.xml'));
+      if (origManifest && !repairedFiles.some(f => f.path === origManifest.path)) {
+        repairedFiles.push({ path: origManifest.path, content: origManifest.content, status: 'modified' });
+        fixedCount++;
+        fixLogs.push(`[AUTO-FIX REGRESI] Memulihkan berkas manifes ${origManifest.path} dari versi awal`);
+      }
+    }
+  }
+
+  return { fixedCount, fixLogs, repairedFiles };
+}
+

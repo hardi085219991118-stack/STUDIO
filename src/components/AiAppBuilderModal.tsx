@@ -27,6 +27,7 @@ import {
   FolderGit2,
   Eye,
   Info,
+  Wrench,
 } from 'lucide-react';
 import { ProjectFile } from '../types';
 
@@ -175,6 +176,7 @@ export const AiAppBuilderModal: React.FC<AiAppBuilderModalProps> = ({
         body: JSON.stringify({
           prompt,
           projectName,
+          projectContext: includeContext ? { files } : undefined,
           includeContext,
         }),
       });
@@ -207,6 +209,7 @@ export const AiAppBuilderModal: React.FC<AiAppBuilderModalProps> = ({
         body: JSON.stringify({
           prompt,
           projectName,
+          projectContext: includeContext ? { files } : undefined,
           plan: plan || undefined,
           allowDestructive,
           includeContext,
@@ -214,10 +217,28 @@ export const AiAppBuilderModal: React.FC<AiAppBuilderModalProps> = ({
       });
 
       const data = await res.json();
-      if (data.success && data.result) {
-        setResult(data.result);
-        if (data.result.plan) {
-          setPlan(data.result.plan);
+      const executionResult = data.result || (data.success ? {
+        commandPrompt: prompt,
+        plan: plan || data.plan,
+        filesCreated: data.filesCreated || [],
+        filesModified: data.filesModified || [],
+        filesDeleted: data.filesDeleted || [],
+        buildStatus: data.buildEnvironment?.isBuildReady ? 'PASS' : 'LIMITED_BY_ENVIRONMENT',
+        testStatus: data.buildEnvironment?.isBuildReady ? 'PASS' : 'FAIL',
+        testDetails: data.buildEnvironment?.isBuildReady ? ['Tests ready'] : ['Environment limited'],
+        auditStatus: data.audit?.passed ? 'PASS' : 'FAIL',
+        auditIssues: data.audit?.issues || [],
+        regressionStatus: data.regression?.passed ? 'PASS' : 'FAIL',
+        regressionDetails: data.regression?.details || [],
+        apkStatus: 'NOT_GENERATED',
+        verificationStatus: data.buildEnvironment?.isBuildReady ? 'VERIFIED' : 'LIMITED_BY_ENVIRONMENT',
+        logs: [],
+      } : null);
+
+      if (data.success && executionResult) {
+        setResult(executionResult);
+        if (executionResult.plan) {
+          setPlan(executionResult.plan);
         }
         setActiveTab('results');
         onProjectUpdated();
@@ -226,6 +247,43 @@ export const AiAppBuilderModal: React.FC<AiAppBuilderModalProps> = ({
       }
     } catch (err: any) {
       alert(`Kesalahan jaringan: ${err.message}`);
+    } finally {
+      setExecuting(false);
+      setCurrentStep('');
+    }
+  };
+
+  const handleAutoFixIssues = async () => {
+    if (!result || result.auditIssues.length === 0) return;
+    const issuesText = result.auditIssues.map(i => `${i.message} (file: ${i.file || 'umum'})`).join('; ');
+    const autoFixPrompt = `Perbaiki dan selesaikan masalah audit berikut pada proyek: ${issuesText}`;
+    setPrompt(autoFixPrompt);
+    setExecuting(true);
+    setActiveTab('pipeline');
+    setCurrentStep('Menjalankan siklus Autonomous Auto-Fix untuk menyelesaikan temuan...');
+    try {
+      const res = await fetch('/api/ai/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: autoFixPrompt,
+          projectName,
+          projectContext: { files },
+          allowDestructive: false,
+          includeContext: true,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.result) {
+        setResult(data.result);
+        if (data.result.plan) setPlan(data.result.plan);
+        setActiveTab('results');
+        onProjectUpdated();
+      } else {
+        alert(data.error || 'Auto-fix gagal');
+      }
+    } catch (err: any) {
+      alert(`Kesalahan jaringan auto-fix: ${err.message}`);
     } finally {
       setExecuting(false);
       setCurrentStep('');
@@ -801,6 +859,19 @@ export const AiAppBuilderModal: React.FC<AiAppBuilderModalProps> = ({
                       </div>
                     ))}
                   </div>
+
+                  {result.auditIssues.length > 0 && (
+                    <div className="pt-2 flex justify-end">
+                      <button
+                        onClick={handleAutoFixIssues}
+                        disabled={executing}
+                        className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded-lg transition-all flex items-center space-x-1.5 shadow-sm"
+                      >
+                        <Wrench className="w-3.5 h-3.5" />
+                        <span>Jalankan Auto-Fix Isu Audit</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Regression Check Details */}

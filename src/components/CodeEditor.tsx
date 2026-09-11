@@ -3,7 +3,7 @@ import {
   X, Pin, Search, Replace, Split, Check, 
   ChevronUp, ChevronDown, Save, FileCode, AlertCircle
 } from 'lucide-react';
-import { EditorTab, SplitMode } from '../types';
+import { EditorTab, SplitMode, Breakpoint } from '../types';
 
 interface CodeEditorProps {
   tabs: EditorTab[];
@@ -22,6 +22,8 @@ interface CodeEditorProps {
   wordWrap?: boolean;
   touchInsertAction?: { text: string; id: number } | null;
   touchKeyAction?: { action: string; id: number } | null;
+  breakpoints?: Breakpoint[];
+  onToggleBreakpoint?: (line: number) => void;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -41,8 +43,11 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   wordWrap = false,
   touchInsertAction,
   touchKeyAction,
+  breakpoints = [],
+  onToggleBreakpoint,
 }) => {
   const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0] || null;
+  const activeTabBreakpoints = activeTab ? breakpoints.filter(b => b.filePath === activeTab.filePath) : [];
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
 
@@ -693,16 +698,29 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           {/* Line Numbers Column */}
           <div
             ref={lineNumbersRef}
-            className="w-10 sm:w-12 bg-[#1e1f22] border-r border-[#2b2d30] py-2 text-right pr-2 text-[#4e5157] select-none font-mono text-[12px] leading-relaxed overflow-hidden shrink-0"
+            className="w-11 sm:w-14 bg-[#1e1f22] border-r border-[#2b2d30] py-2 text-right pr-2 text-[#4e5157] select-none font-mono text-[12px] leading-relaxed overflow-hidden shrink-0"
           >
-            {lines.map((_, idx) => (
-              <div
-                key={idx}
-                className={idx + 1 === cursorPos.line ? 'text-[#3574f0] font-bold bg-[#2b2d30]/30' : ''}
-              >
-                {idx + 1}
-              </div>
-            ))}
+            {lines.map((_, idx) => {
+              const lineNum = idx + 1;
+              const bp = activeTabBreakpoints.find(b => b.line === lineNum);
+              return (
+                <div
+                  key={idx}
+                  onClick={() => onToggleBreakpoint && onToggleBreakpoint(lineNum)}
+                  title={bp ? `Breakpoint baris ${lineNum} (klik untuk hapus)` : `Klik untuk pasang breakpoint di baris ${lineNum}`}
+                  className={`cursor-pointer hover:text-white flex items-center justify-end space-x-1 group ${
+                    lineNum === cursorPos.line ? 'text-[#3574f0] font-bold bg-[#2b2d30]/30' : ''
+                  }`}
+                >
+                  {bp ? (
+                    <span className={`w-2 h-2 rounded-full shrink-0 ${bp.enabled ? 'bg-[#e06c75] ring-2 ring-red-500/30' : 'border border-[#e06c75]'}`} />
+                  ) : (
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#e06c75]/50 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                  )}
+                  <span>{lineNum}</span>
+                </div>
+              );
+            })}
           </div>
 
           {/* Code Textarea */}

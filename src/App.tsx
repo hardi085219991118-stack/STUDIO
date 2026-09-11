@@ -3,7 +3,7 @@ import {
   ProjectFile, EditorTab, ProjectConfig, DeviceInfo, 
   BuildResult, BuildLogEntry, BuildStepPhase, LogcatMessage, 
   SplitMode, IdeSettings, BottomToolTab, BuildEnvironmentStatus, 
-  BuildTaskType, FileClipboard, FileType
+  BuildTaskType, FileClipboard, FileType, Breakpoint
 } from './types';
 import { INITIAL_PROJECT_CONFIG, generateProjectFiles } from './data/templates';
 import { TopMenuBar } from './components/TopMenuBar';
@@ -16,6 +16,7 @@ import { BuildPanel } from './components/BuildPanel';
 import { DeviceSimulator } from './components/DeviceSimulator';
 import { TerminalPanel } from './components/TerminalPanel';
 import { LogcatPanel } from './components/LogcatPanel';
+import { DebuggerPanel } from './components/DebuggerPanel';
 import { DeviceManagerModal } from './components/DeviceManagerModal';
 import { NewProjectModal } from './components/NewProjectModal';
 import { SearchEverywhereModal } from './components/SearchEverywhereModal';
@@ -31,9 +32,10 @@ import { AiAppBuilderModal } from './components/AiAppBuilderModal';
 import { AdbService } from './services/AdbService';
 import { ApkService } from './services/ApkService';
 import { GradleService } from './services/GradleService';
+import { findLauncherActivity } from './utils/androidManifest';
 import { 
   Terminal as TerminalIcon, Hammer, Smartphone, 
-  ChevronUp, ChevronDown, Package, GitBranch
+  ChevronUp, ChevronDown, Package, GitBranch, Bug
 } from 'lucide-react';
 
 const STORAGE_KEY_FILES = 'asm_project_files_v2';
@@ -89,6 +91,49 @@ export default function App() {
   const [isAppRunning, setIsAppRunning] = useState(false);
   const [runButtonState, setRunButtonState] = useState<string>('Run');
 
+  // Debugger & Breakpoints State
+  const [breakpoints, setBreakpoints] = useState<Breakpoint[]>([
+    {
+      id: 'bp-1',
+      filePath: 'app/src/main/java/com/example/myapplication/MainActivity.kt',
+      fileName: 'MainActivity.kt',
+      line: 18,
+      enabled: true,
+    },
+  ]);
+
+  const handleToggleBreakpointAtLine = (line: number) => {
+    if (!activeTab) return;
+    const existing = breakpoints.find(b => b.filePath === activeTab.filePath && b.line === line);
+    if (existing) {
+      setBreakpoints(prev => prev.filter(b => b.id !== existing.id));
+    } else {
+      const newBp: Breakpoint = {
+        id: 'bp-' + Date.now(),
+        filePath: activeTab.filePath,
+        fileName: activeTab.fileName,
+        line,
+        enabled: true,
+      };
+      setBreakpoints(prev => [...prev, newBp]);
+    }
+  };
+
+  const handleToggleBreakpointEnabled = (id: string) => {
+    setBreakpoints(prev => prev.map(b => b.id === id ? { ...b, enabled: !b.enabled } : b));
+  };
+
+  const handleRemoveBreakpoint = (id: string) => {
+    setBreakpoints(prev => prev.filter(b => b.id !== id));
+  };
+
+  const handleJumpToBreakpoint = (filePath: string) => {
+    const file = files.find(f => f.path === filePath);
+    if (file) {
+      handleOpenFile(file);
+    }
+  };
+
   // Query real ADB devices
   const refreshAdbDevices = async () => {
     setIsRefreshingDevices(true);
@@ -122,7 +167,7 @@ export default function App() {
 
   // Logcat
   const [logcatMessages, setLogcatMessages] = useState<LogcatMessage[]>([
-    { id: '1', timestamp: new Date().toLocaleTimeString(), pid: 1420, tid: 1420, level: 'I', tag: 'AndroidStudioMobile', message: 'Workspace initialized for ' + projectConfig.name },
+    { id: '1', timestamp: new Date().toLocaleTimeString(), level: 'I', tag: 'IDE', message: 'Workspace initialized for ' + projectConfig.name, source: 'ide' },
   ]);
 
   // Modals
@@ -542,7 +587,27 @@ export default function App() {
       });
       setFiles(prev => [...prev, newFile]);
     } else if (clipboard.operation === 'cut') {
-      await handleRenameFile(sourceFile.id, clipboard.fileName);
+      if (newPath !== sourceFile.path) {
+        try {
+          const res = await fetch('/api/fs/rename', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              projectName: projectConfig.name,
+              oldPath: sourceFile.path,
+              newPath: newPath,
+            }),
+          });
+          if (res.ok) {
+            setFiles(prev => prev.map(f => f.id === sourceFile.id ? { ...f, path: newPath, name: clipboard.fileName } : f));
+            setOpenTabs(prev => prev.map(t => t.fileId === sourceFile.id ? { ...t, title: clipboard.fileName } : t));
+          } else {
+            console.error('Failed to move cut file on server');
+          }
+        } catch (err) {
+          console.error('Failed to rename/move cut file:', err);
+        }
+      }
       setClipboard(null);
     }
   };
@@ -752,11 +817,10 @@ export default function App() {
         {
           id: Date.now().toString(),
           timestamp: ts,
-          pid: 0,
-          tid: 0,
           level: 'W',
-          tag: 'DeviceManager',
+          tag: 'IDE-Device',
           message: 'Cannot run app: No target device connected. Connect an Android device via USB or Wireless ADB in Device Manager.',
+          source: 'ide',
         }
       ]);
       return;
@@ -772,11 +836,10 @@ export default function App() {
       {
         id: Date.now().toString(),
         timestamp: ts,
-        pid: 100,
-        tid: 100,
         level: 'I',
-        tag: 'DeployTarget',
+        tag: 'IDE-Deploy',
         message: `Deploying ${projectConfig.name} to target: ${selectedDevice.name} (${selectedDevice.id})...`,
+        source: 'ide',
       }
     ]);
 
@@ -792,11 +855,10 @@ export default function App() {
           {
             id: Date.now().toString(),
             timestamp: new Date().toLocaleTimeString(),
-            pid: 100,
-            tid: 100,
             level: 'I',
-            tag: 'Gradle',
+            tag: 'IDE-Gradle',
             message: 'No compiled APK found. Running assembleDebug build...',
+            source: 'ide',
           }
         ]);
 
@@ -812,11 +874,10 @@ export default function App() {
           {
             id: Date.now().toString(),
             timestamp: new Date().toLocaleTimeString(),
-            pid: 100,
-            tid: 100,
             level: 'E',
-            tag: 'ApkInstaller',
+            tag: 'IDE-Deploy',
             message: 'ABORT: No installable APK package found. Build assembleDebug must succeed before deployment.',
+            source: 'ide',
           }
         ]);
         return;
@@ -829,11 +890,10 @@ export default function App() {
         {
           id: Date.now().toString(),
           timestamp: new Date().toLocaleTimeString(),
-          pid: 100,
-          tid: 100,
           level: 'I',
-          tag: 'ApkInstaller',
+          tag: 'IDE-Deploy',
           message: `Streaming APK install to ${selectedDevice.id}: ${targetApk.fileName} (${(targetApk.sizeBytes / 1024 / 1024).toFixed(2)} MB)...`,
+          source: 'ide',
         }
       ]);
 
@@ -845,11 +905,10 @@ export default function App() {
           {
             id: Date.now().toString(),
             timestamp: new Date().toLocaleTimeString(),
-            pid: 100,
-            tid: 100,
             level: 'E',
-            tag: 'ApkInstaller',
+            tag: 'IDE-Deploy',
             message: `INSTALLATION FAILED: ${installRes.reason || installRes.error || 'Failed to install APK on device'}`,
+            source: 'ide',
           }
         ]);
         return;
@@ -860,17 +919,25 @@ export default function App() {
         {
           id: Date.now().toString(),
           timestamp: new Date().toLocaleTimeString(),
-          pid: 100,
-          tid: 100,
           level: 'I',
-          tag: 'ApkInstaller',
+          tag: 'IDE-Deploy',
           message: `INSTALL SUCCESSFUL: Package ${projectConfig.packageName} installed on ${selectedDevice.name}`,
+          source: 'ide',
         }
       ]);
 
-      // 4. Launch Application
+      // 4. Launch Application - Dynamic launcher discovery (no hardcoded .MainActivity)
       setRunButtonState('Launching...');
-      const launchRes = await AdbService.launchApp(selectedDevice.id, projectConfig.packageName, '.MainActivity');
+      const manifestFile = files.find(f => f.path.endsWith('AndroidManifest.xml'));
+      const detectedLauncher = manifestFile ? findLauncherActivity(manifestFile.content) : null;
+      const launcherActivity = detectedLauncher || '.MainActivity';
+
+      const launchRes = await AdbService.launchApp(
+        selectedDevice.id,
+        projectConfig.packageName,
+        launcherActivity,
+        projectConfig.name
+      );
 
       if (!launchRes.success) {
         setRunButtonState('Run');
@@ -879,17 +946,16 @@ export default function App() {
           {
             id: Date.now().toString(),
             timestamp: new Date().toLocaleTimeString(),
-            pid: 100,
-            tid: 100,
             level: 'E',
-            tag: 'ActivityManager',
+            tag: 'IDE-Deploy',
             message: `LAUNCH FAILED: ${launchRes.error || 'Activity not found or device refused intent'}`,
+            source: 'ide',
           }
         ]);
         return;
       }
 
-      // 5. Genuine execution running
+      // 5. Genuine execution running notification
       setIsAppRunning(true);
       setRunButtonState('Running');
       setLogcatMessages(prev => [
@@ -897,20 +963,18 @@ export default function App() {
         {
           id: Date.now().toString(),
           timestamp: new Date().toLocaleTimeString(),
-          pid: 2480,
-          tid: 2480,
           level: 'I',
-          tag: 'ActivityManager',
-          message: `START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=${projectConfig.packageName}/.MainActivity}`,
+          tag: 'IDE-Run',
+          message: `START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=${projectConfig.packageName}/${launcherActivity}}`,
+          source: 'ide',
         },
         {
           id: (Date.now() + 1).toString(),
           timestamp: new Date().toLocaleTimeString(),
-          pid: 2480,
-          tid: 2480,
           level: 'D',
-          tag: 'MainActivity',
-          message: `Application running on ${selectedDevice.name}`,
+          tag: 'IDE-Run',
+          message: `Application launched on ${selectedDevice.name} (${launcherActivity})`,
+          source: 'ide',
         }
       ]);
 
@@ -922,11 +986,10 @@ export default function App() {
         {
           id: Date.now().toString(),
           timestamp: new Date().toLocaleTimeString(),
-          pid: 100,
-          tid: 100,
           level: 'E',
-          tag: 'DeployTarget',
+          tag: 'IDE-Deploy',
           message: `DEPLOY ERROR: ${err.message || 'Unknown deployment error'}`,
+          source: 'ide',
         }
       ]);
     }
@@ -943,11 +1006,10 @@ export default function App() {
       {
         id: Date.now().toString(),
         timestamp: new Date().toLocaleTimeString(),
-        pid: 0,
-        tid: 0,
         level: 'I',
-        tag: 'ActivityManager',
+        tag: 'IDE-Run',
         message: `Force stopping process: ${projectConfig.packageName}`,
+        source: 'ide',
       }
     ]);
   };
@@ -1329,6 +1391,8 @@ export default function App() {
                 wordWrap={settings.wordWrap}
                 touchInsertAction={touchInsertAction}
                 touchKeyAction={touchKeyAction}
+                breakpoints={breakpoints}
+                onToggleBreakpoint={handleToggleBreakpointAtLine}
               />
             )}
           </div>
@@ -1391,6 +1455,29 @@ export default function App() {
             </button>
 
             <button
+              onClick={() => { setBottomTab('debugger'); setIsBottomOpen(true); }}
+              className={`px-3 py-1 rounded text-xs flex items-center gap-1.5 font-medium transition-colors ${
+                bottomTab === 'debugger' && isBottomOpen ? 'bg-[#2b2d30] text-[#e06c75] font-bold' : 'text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              <Bug className="w-3.5 h-3.5" />
+              <span>Debugger</span>
+              {breakpoints.length > 0 && (
+                <span className="w-1.5 h-1.5 rounded-full bg-[#e06c75]" />
+              )}
+            </button>
+
+            <button
+              onClick={() => { setBottomTab('git'); setIsBottomOpen(true); }}
+              className={`px-3 py-1 rounded text-xs flex items-center gap-1.5 font-medium transition-colors ${
+                bottomTab === 'git' && isBottomOpen ? 'bg-[#2b2d30] text-[#f4a261] font-bold' : 'text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              <GitBranch className="w-3.5 h-3.5" />
+              <span>Git</span>
+            </button>
+
+            <button
               onClick={() => { setBottomTab('device'); setIsBottomOpen(true); }}
               className={`px-3 py-1 rounded text-xs flex items-center gap-1.5 font-medium transition-colors ${
                 bottomTab === 'device' && isBottomOpen ? 'bg-[#2b2d30] text-[#3ddc84] font-bold' : 'text-gray-400 hover:text-gray-200'
@@ -1449,6 +1536,25 @@ export default function App() {
                 onRunBuild={() => handleTriggerBuild('assembleDebug')}
               />
             )}
+            {bottomTab === 'debugger' && (
+              <DebuggerPanel
+                breakpoints={breakpoints}
+                onToggleBreakpoint={handleToggleBreakpointEnabled}
+                onRemoveBreakpoint={handleRemoveBreakpoint}
+                onJumpToBreakpoint={handleJumpToBreakpoint}
+                isAppRunning={isAppRunning}
+                selectedDevice={selectedDevice}
+                activeFileName={activeTab?.fileName}
+              />
+            )}
+            {bottomTab === 'git' && (
+              <div className="w-full h-full flex flex-col">
+                <GitPanel
+                  projectName={projectConfig.name}
+                  onClose={() => setBottomTab('build')}
+                />
+              </div>
+            )}
             {bottomTab === 'device' && (
               <DeviceSimulator
                 device={selectedDevice}
@@ -1464,11 +1570,10 @@ export default function App() {
                     {
                       id: Date.now().toString(),
                       timestamp: ts,
-                      pid: 2480,
-                      tid: 2480,
                       level: 'D',
                       tag,
                       message: msg,
+                      source: 'ide',
                     }
                   ]);
                 }}

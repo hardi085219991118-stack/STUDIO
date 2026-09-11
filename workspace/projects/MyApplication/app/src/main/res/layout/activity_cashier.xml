@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#121316">
+
+    <TextView
+        android:id="@+id/txtCashierTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Kasir Sederhana POS"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#1E1F22"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Katalog Produk Cepat"
+            android:textColor="#3DDC84"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btnAddKopi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="+ Kopi Robusta (Rp 15.000)"
+            android:backgroundTint="#2B2D30"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="6dp" />
+
+        <Button
+            android:id="@+id/btnAddRoti"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="+ Roti Bakar (Rp 18.000)"
+            android:backgroundTint="#2B2D30"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#1E1F22"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Total Tagihan:"
+            android:textColor="#9E9E9E"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/txtTotalAmount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Rp 0"
+            android:textColor="#3DDC84"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnCheckout"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Selesaikan Transaksi (Bayar)"
+        android:backgroundTint="#3574F0"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <Button
+        android:id="@+id/btnClearCart"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:text="Reset Keranjang"
+        android:backgroundTint="#E53935"
+        android:textColor="#FFFFFF" />
+
+</LinearLayout>

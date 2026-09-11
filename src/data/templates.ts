@@ -413,6 +413,108 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 `;
 
+  const dataExtractionRulesXml = `<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="root" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="root" path="." />
+    </device-transfer>
+</data-extraction-rules>`;
+
+  const backupRulesXml = `<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <include domain="sharedpref" path="." />
+</full-backup-content>`;
+
+  const icLauncherBackgroundXml = `<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#3DDC84"
+        android:pathData="M0,0h108v108h-108z" />
+</vector>`;
+
+  const icLauncherForegroundXml = `<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M31,64.5c0,1.9 1.6,3.5 3.5,3.5h39c1.9,0 3.5,-1.6 3.5,-3.5v-23.5h-46v23.5z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,26c-9.4,0 -17.2,6.3 -19.5,15h39c-2.3,-8.7 -10.1,-15 -19.5,-15z" />
+</vector>`;
+
+  const icLauncherXml = `<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_launcher_background" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+</adaptive-icon>`;
+
+  const proguardRulesPro = `# Add project specific ProGuard rules here.
+# By default, the flags in this file are appended to flags specified
+# in defaultProguardFile("proguard-android-optimize.txt")
+-keep public class * extends android.app.Activity
+`;
+
+  const gradlewBash = `#!/bin/sh
+# Gradle start up script for POSIX
+DIRNAME=\`dirname "$0"\`
+GRADLE_WRAPPER_JAR="$DIRNAME/gradle/wrapper/gradle-wrapper.jar"
+
+if [ -n "$JAVA_HOME" ] ; then
+    JAVACMD="$JAVA_HOME/bin/java"
+else
+    JAVACMD="java"
+fi
+
+if ! command -v "$JAVACMD" >/dev/null 2>&1 ; then
+    echo "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH." >&2
+    exit 1
+fi
+
+if [ ! -f "$GRADLE_WRAPPER_JAR" ] ; then
+    # Fallback to system gradle if jar not bundled
+    if command -v gradle >/dev/null 2>&1 ; then
+        exec gradle "$@"
+    else
+        echo "ERROR: Gradle wrapper JAR not found at $GRADLE_WRAPPER_JAR and system gradle is missing." >&2
+        exit 1
+    fi
+fi
+
+exec "$JAVACMD" -jar "$GRADLE_WRAPPER_JAR" "$@"
+`;
+
+  const gradlewBat = `@rem Gradle startup script for Windows
+@if "%DEBUG%" == "" @echo off
+set DIRNAME=%~dp0
+if defined JAVA_HOME goto findJavaFromJavaHome
+set JAVACMD=java.exe
+goto checkJava
+:findJavaFromJavaHome
+set JAVACMD=%JAVA_HOME%\\bin\\java.exe
+:checkJava
+"%JAVACMD%" -version >nul 2>&1
+if "%ERRORLEVEL%" == "0" goto runWrapper
+echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+exit /b 1
+:runWrapper
+if exist "%DIRNAME%gradle\\wrapper\\gradle-wrapper.jar" (
+    "%JAVACMD%" -jar "%DIRNAME%gradle\\wrapper\\gradle-wrapper.jar" %*
+) else (
+    gradle %*
+)
+`;
+
   const codeContent = isKotlin ? mainActivityKotlin : mainActivityJava;
 
   return [
@@ -468,6 +570,65 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
       type: 'xml',
       isFolder: false,
     },
+    // Manifest-Referenced XML Rules
+    {
+      id: 'f-data-extraction',
+      name: 'data_extraction_rules.xml',
+      path: 'app/src/main/res/xml/data_extraction_rules.xml',
+      content: dataExtractionRulesXml,
+      type: 'xml',
+      isFolder: false,
+    },
+    {
+      id: 'f-backup-rules',
+      name: 'backup_rules.xml',
+      path: 'app/src/main/res/xml/backup_rules.xml',
+      content: backupRulesXml,
+      type: 'xml',
+      isFolder: false,
+    },
+    // Launcher Icons & Drawables
+    {
+      id: 'f-ic-bg',
+      name: 'ic_launcher_background.xml',
+      path: 'app/src/main/res/drawable/ic_launcher_background.xml',
+      content: icLauncherBackgroundXml,
+      type: 'xml',
+      isFolder: false,
+    },
+    {
+      id: 'f-ic-fg',
+      name: 'ic_launcher_foreground.xml',
+      path: 'app/src/main/res/drawable/ic_launcher_foreground.xml',
+      content: icLauncherForegroundXml,
+      type: 'xml',
+      isFolder: false,
+    },
+    {
+      id: 'f-ic-launcher',
+      name: 'ic_launcher.xml',
+      path: 'app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml',
+      content: icLauncherXml,
+      type: 'xml',
+      isFolder: false,
+    },
+    {
+      id: 'f-ic-launcher-round',
+      name: 'ic_launcher_round.xml',
+      path: 'app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml',
+      content: icLauncherXml,
+      type: 'xml',
+      isFolder: false,
+    },
+    // Proguard Rules
+    {
+      id: 'f-proguard',
+      name: 'proguard-rules.pro',
+      path: 'app/proguard-rules.pro',
+      content: proguardRulesPro,
+      type: 'text',
+      isFolder: false,
+    },
     // Gradle Scripts
     {
       id: 'f-build-gradle-app',
@@ -498,6 +659,22 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
       name: 'gradle-wrapper.properties',
       path: 'gradle/wrapper/gradle-wrapper.properties',
       content: gradleWrapperProperties,
+      type: 'text',
+      isFolder: false,
+    },
+    {
+      id: 'f-gradlew',
+      name: 'gradlew',
+      path: 'gradlew',
+      content: gradlewBash,
+      type: 'text',
+      isFolder: false,
+    },
+    {
+      id: 'f-gradlew-bat',
+      name: 'gradlew.bat',
+      path: 'gradlew.bat',
+      content: gradlewBat,
       type: 'text',
       isFolder: false,
     },

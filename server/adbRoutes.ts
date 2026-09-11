@@ -230,7 +230,7 @@ export function createAdbRouter(workspaceDir: string): Router {
 
   // 6. Launch App on Device
   router.post('/launch', async (req, res) => {
-    const { serial, packageName, activityName } = req.body;
+    const { serial, packageName, activityName, projectName } = req.body;
     if (!serial || !packageName) {
       return res.status(400).json({ success: false, error: 'serial and packageName are required' });
     }
@@ -245,7 +245,42 @@ export function createAdbRouter(workspaceDir: string): Router {
       });
     }
 
-    const target = activityName ? `${packageName}/${activityName}` : `${packageName}/.MainActivity`;
+    // Dynamic launcher activity detection from AndroidManifest.xml
+    let resolvedActivity = activityName;
+    if (!resolvedActivity && projectName) {
+      try {
+        const manifestPaths = [
+          path.join(workspaceDir, projectName, 'app', 'src', 'main', 'AndroidManifest.xml'),
+          path.join(workspaceDir, projectName, 'AndroidManifest.xml'),
+        ];
+        for (const mp of manifestPaths) {
+          if (fs.existsSync(mp)) {
+            const manifestXml = fs.readFileSync(mp, 'utf-8');
+            const actRegex = /<activity\b([^>]*?)>([\s\S]*?)<\/activity>/gi;
+            let m;
+            while ((m = actRegex.exec(manifestXml)) !== null) {
+              const body = m[2];
+              if (body.includes('android.intent.action.MAIN') && body.includes('android.intent.category.LAUNCHER')) {
+                const nameMatch = m[1].match(/android:name=["']([^"']+)["']/);
+                if (nameMatch) {
+                  resolvedActivity = nameMatch[1];
+                  break;
+                }
+              }
+            }
+            if (resolvedActivity) break;
+          }
+        }
+      } catch (e) {
+        // Fallback below
+      }
+    }
+
+    resolvedActivity = resolvedActivity || '.MainActivity';
+    const target = resolvedActivity.startsWith('.') || resolvedActivity.includes('.')
+      ? (resolvedActivity.startsWith('.') ? `${packageName}/${resolvedActivity}` : resolvedActivity.includes('/') ? resolvedActivity : `${packageName}/${resolvedActivity}`)
+      : `${packageName}/.${resolvedActivity}`;
+
     exec(`adb -s ${serial} shell am start -n ${target}`, { timeout: 10000 }, (err, stdout, stderr) => {
       const output = (stdout || stderr || '').trim();
       const isError = err || output.toLowerCase().includes('error');

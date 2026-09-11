@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121316"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🏷️ Kalkulator Diskon"
+            android:textColor="#3DDC84"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:id="@+id/txtFeatureStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Masukkan harga asli dan diskon"
+            android:textColor="#B0B0B0"
+            android:textSize="13sp"
+            android:gravity="center"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Harga Asli (Rp)"
+            android:textColor="#E0E0E0"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="6dp" />
+
+        <EditText
+            android:id="@+id/etOriginalPrice"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="#1F2128"
+            android:hint="Contoh: 150000"
+            android:textColorHint="#707070"
+            android:textColor="#FFFFFF"
+            android:inputType="numberDecimal"
+            android:paddingHorizontal="14dp"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Persentase Diskon (%)"
+            android:textColor="#E0E0E0"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="6dp" />
+
+        <EditText
+            android:id="@+id/etDiscountPercent"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="#1F2128"
+            android:hint="Contoh: 20"
+            android:textColorHint="#707070"
+            android:textColor="#FFFFFF"
+            android:inputType="numberDecimal"
+            android:paddingHorizontal="14dp"
+            android:layout_marginBottom="10dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pilihan Diskon Cepat:"
+            android:textColor="#8E9297"
+            android:textSize="12sp"
+            android:layout_marginBottom="8dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="20dp">
+
+            <Button
+                android:id="@+id/btnQuick10"
+                style="?android:attr/buttonBarStyle"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:text="10%"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#2C2F36"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btnQuick20"
+                style="?android:attr/buttonBarStyle"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:text="20%"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#2C2F36"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btnQuick30"
+                style="?android:attr/buttonBarStyle"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:text="30%"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#2C2F36"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btnQuick50"
+                style="?android:attr/buttonBarStyle"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:text="50%"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#2C2F36"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btnQuick70"
+                style="?android:attr/buttonBarStyle"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:text="70%"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#2C2F36"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="20dp">
+
+            <Button
+                android:id="@+id/btnCalculate"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="2"
+                android:text="Hitung Diskon"
+                android:textStyle="bold"
+                android:textColor="#121316"
+                android:backgroundTint="#3DDC84"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btnReset"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:text="Reset"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#424652" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/cardResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#1C2028"
+            android:padding="16dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ringkasan Pembayaran"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Harga Asli:"
+                    android:textColor="#A0A0A0"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/txtOriginalPriceResult"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Rp 0"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Hemat Diskon:"
+                    android:textColor="#A0A0A0"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/txtDiscountAmount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="- Rp 0 (0%)"
+                    android:textColor="#3DDC84"
+                    android:textStyle="bold"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#333742"
+                android:layout_marginBottom="12dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Total Bayar:"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/txtFinalPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Rp 0"
+                    android:textColor="#3DDC84"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

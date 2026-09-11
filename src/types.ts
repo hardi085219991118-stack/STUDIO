@@ -69,11 +69,12 @@ export type LogLevel = 'V' | 'D' | 'I' | 'W' | 'E' | 'F';
 export interface LogcatMessage {
   id: string;
   timestamp: string;
-  pid: number;
-  tid: number;
+  pid?: number;
+  tid?: number;
   level: LogLevel;
   tag: string;
   message: string;
+  source?: 'device' | 'ide';
 }
 
 export type DeviceConnectionStatus = 'ONLINE' | 'OFFLINE' | 'UNAUTHORIZED' | 'DISCONNECTED' | 'CONNECTING' | 'ERROR' | 'LIMITED';
@@ -236,8 +237,34 @@ export interface ProjectConfig {
   lastOpened: number;
 }
 
-export type BottomPanelTab = 'terminal' | 'logcat' | 'build' | 'git' | 'problems' | 'appRunner' | 'apk' | 'adb';
-export type BottomToolTab = 'terminal' | 'logcat' | 'build' | 'device' | 'git' | 'problems' | 'apk' | 'adb';
+export type BottomPanelTab = 'terminal' | 'logcat' | 'build' | 'git' | 'problems' | 'appRunner' | 'apk' | 'adb' | 'debugger';
+export type BottomToolTab = 'terminal' | 'logcat' | 'build' | 'device' | 'git' | 'problems' | 'apk' | 'adb' | 'debugger';
+
+export interface Breakpoint {
+  id: string;
+  filePath: string;
+  fileName: string;
+  line: number;
+  enabled: boolean;
+  condition?: string;
+  hitCount?: number;
+}
+
+export interface VariableItem {
+  name: string;
+  type: string;
+  value: string;
+  children?: VariableItem[];
+}
+
+export interface StackFrame {
+  id: string;
+  method: string;
+  className: string;
+  fileName: string;
+  line: number;
+  isUserCode: boolean;
+}
 
 export type AutosaveOption = 'off' | '30s' | '1m' | '5m';
 

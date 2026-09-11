@@ -20,6 +20,7 @@ export const LogcatPanel: React.FC<LogcatPanelProps> = ({
   onAppendLog,
 }) => {
   const [filterLevel, setFilterLevel] = useState<LogLevel | 'ALL'>('ALL');
+  const [sourceFilter, setSourceFilter] = useState<'ALL' | 'device' | 'ide'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [packageFilter, setPackageFilter] = useState('');
   const [tagFilter, setTagFilter] = useState('');
@@ -56,6 +57,7 @@ export const LogcatPanel: React.FC<LogcatPanelProps> = ({
               level: threadTimeMatch[4] as LogLevel,
               tag: threadTimeMatch[5].trim(),
               message: threadTimeMatch[6],
+              source: 'device',
             });
             return;
           }
@@ -71,6 +73,7 @@ export const LogcatPanel: React.FC<LogcatPanelProps> = ({
               pid: parseInt(timeMatch[4], 10),
               tid: parseInt(timeMatch[4], 10),
               message: timeMatch[5],
+              source: 'device',
             });
             return;
           }
@@ -86,6 +89,7 @@ export const LogcatPanel: React.FC<LogcatPanelProps> = ({
               pid: parseInt(briefMatch[3], 10),
               tid: parseInt(briefMatch[3], 10),
               message: briefMatch[4],
+              source: 'device',
             });
             return;
           }
@@ -101,10 +105,9 @@ export const LogcatPanel: React.FC<LogcatPanelProps> = ({
             id: `log-${Date.now()}-${idx}`,
             timestamp: new Date().toLocaleTimeString(),
             level: detectedLevel,
-            pid: 0,
-            tid: 0,
-            tag: 'System',
+            tag: 'DeviceSystem',
             message: trimmed,
+            source: 'device',
           });
         });
       } else if (!res.success && onAppendLog) {
@@ -112,10 +115,9 @@ export const LogcatPanel: React.FC<LogcatPanelProps> = ({
           id: `log-err-${Date.now()}`,
           timestamp: new Date().toLocaleTimeString(),
           level: 'W',
-          pid: 0,
-          tid: 0,
           tag: 'AdbLogcat',
           message: res.limitationReason || res.error || 'LOGCAT LIMITED BY ENVIRONMENT: Unable to read stream from device',
+          source: 'ide',
         });
       }
     } catch (e: any) {
@@ -124,10 +126,9 @@ export const LogcatPanel: React.FC<LogcatPanelProps> = ({
           id: `log-err-${Date.now()}`,
           timestamp: new Date().toLocaleTimeString(),
           level: 'E',
-          pid: 0,
-          tid: 0,
           tag: 'AdbLogcat',
           message: `Logcat query error: ${e.message}`,
+          source: 'ide',
         });
       }
     } finally {
@@ -138,6 +139,10 @@ export const LogcatPanel: React.FC<LogcatPanelProps> = ({
   const filteredLogs = logs.filter(log => {
     if (filterLevel !== 'ALL' && log.level !== filterLevel) {
       return false;
+    }
+    if (sourceFilter !== 'ALL') {
+      const actualSource = log.source || (log.tag.startsWith('IDE') ? 'ide' : 'device');
+      if (actualSource !== sourceFilter) return false;
     }
     if (tagFilter && !log.tag.toLowerCase().includes(tagFilter.toLowerCase())) {
       return false;
@@ -203,6 +208,36 @@ export const LogcatPanel: React.FC<LogcatPanelProps> = ({
 
         {/* Filters & Actions */}
         <div className="flex items-center space-x-2">
+          {/* Source Filter: Device vs IDE */}
+          <div className="flex items-center bg-[#2b2d30] p-0.5 rounded border border-[#393b40] text-[10px]">
+            <button
+              onClick={() => setSourceFilter('ALL')}
+              className={`px-1.5 py-0.5 rounded font-medium transition-colors ${
+                sourceFilter === 'ALL' ? 'bg-[#3574f0] text-white' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              Semua
+            </button>
+            <button
+              onClick={() => setSourceFilter('device')}
+              className={`px-1.5 py-0.5 rounded font-medium transition-colors ${
+                sourceFilter === 'device' ? 'bg-[#3ddc84] text-black font-semibold' : 'text-gray-400 hover:text-white'
+              }`}
+              title="Log nyata langsung dari daemon adb logcat perangkat"
+            >
+              Device (ADB)
+            </button>
+            <button
+              onClick={() => setSourceFilter('ide')}
+              className={`px-1.5 py-0.5 rounded font-medium transition-colors ${
+                sourceFilter === 'ide' ? 'bg-[#ffc107] text-black font-semibold' : 'text-gray-400 hover:text-white'
+              }`}
+              title="Notifikasi event internal Android Studio IDE"
+            >
+              IDE Event
+            </button>
+          </div>
+
           {/* Level Filter */}
           <select
             value={filterLevel}
@@ -275,19 +310,30 @@ export const LogcatPanel: React.FC<LogcatPanelProps> = ({
             Tidak ada entri Logcat yang cocok dengan filter saat ini.
           </div>
         ) : (
-          filteredLogs.map(log => (
-            <div key={log.id} className="flex items-start space-x-2 hover:bg-[#18191c] px-1 py-0.5 rounded">
-              <span className="text-gray-500 text-[10px] shrink-0">{log.timestamp}</span>
-              <span className="text-gray-600 text-[10px] shrink-0">{log.pid}-{log.tid}</span>
-              <span className={`w-3.5 text-center shrink-0 font-bold ${getLevelColor(log.level)}`}>
-                {log.level}
-              </span>
-              <span className="text-[#a97bff] shrink-0 font-semibold max-w-[120px] truncate">{log.tag}:</span>
-              <span className={`flex-1 break-all ${getLevelColor(log.level)}`}>
-                {log.message}
-              </span>
-            </div>
-          ))
+          filteredLogs.map(log => {
+            const isDevice = log.source === 'device' || (log.pid !== undefined && log.pid > 0);
+            return (
+              <div key={log.id} className="flex items-start space-x-2 hover:bg-[#18191c] px-1 py-0.5 rounded">
+                <span className="text-gray-500 text-[10px] shrink-0">{log.timestamp}</span>
+                {isDevice && log.pid ? (
+                  <span className="text-emerald-500/80 text-[10px] shrink-0 font-mono" title="Device PID-TID">
+                    {log.pid}-{log.tid ?? 0}
+                  </span>
+                ) : (
+                  <span className="text-amber-400/80 text-[9px] px-1 bg-amber-400/10 rounded shrink-0 font-mono" title="IDE Internal Event">
+                    IDE
+                  </span>
+                )}
+                <span className={`w-3.5 text-center shrink-0 font-bold ${getLevelColor(log.level)}`}>
+                  {log.level}
+                </span>
+                <span className="text-[#a97bff] shrink-0 font-semibold max-w-[120px] truncate">{log.tag}:</span>
+                <span className={`flex-1 break-all ${getLevelColor(log.level)}`}>
+                  {log.message}
+                </span>
+              </div>
+            );
+          })
         )}
         <div ref={logEndRef} />
       </div>

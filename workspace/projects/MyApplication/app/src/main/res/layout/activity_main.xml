@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center"
+    android:background="#121316">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Aplikasi Serbaguna"
+        android:textColor="#3DDC84"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pilih fitur yang ingin digunakan"
+        android:textColor="#A0A0A0"
+        android:textSize="14sp"
+        android:layout_marginBottom="32dp" />
+
+    <Button
+        android:id="@+id/btnOpenDiscountCalculator"
+        android:layout_width="match_parent"
+        android:layout_height="54dp"
+        android:text="🏷️ Kalkulator Diskon"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="#121316"
+        android:backgroundTint="#3DDC84"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/btnOpenCashier"
+        android:layout_width="match_parent"
+        android:layout_height="54dp"
+        android:text="🛒 Kasir POS"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#2C2F36"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/btnOpenCounter"
+        android:layout_width="match_parent"
+        android:layout_height="54dp"
+        android:text="🔢 Penghitung Klik"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#2C2F36" />
+</LinearLayout>
